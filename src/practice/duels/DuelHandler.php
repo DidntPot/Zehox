@@ -1,16 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-04-22
- * Time: 13:33
- */
 
 declare(strict_types=1);
 
 namespace practice\duels;
 
-
+use JetBrains\PhpStorm\Pure;
+use pocketmine\player\Player;
 use practice\arenas\DuelArena;
 use practice\duels\groups\DuelGroup;
 use practice\duels\groups\MatchedGroup;
@@ -22,13 +17,13 @@ use practice\scoreboard\ScoreboardUtil;
 class DuelHandler
 {
     /* @var QueuedPlayer[] */
-    private $queuedPlayers;
+    private array $queuedPlayers;
 
     /* @var MatchedGroup[] */
-    private $matchedGroups;
+    private array $matchedGroups;
 
     /* @var DuelGroup[] */
-    private $duels;
+    private array $duels;
 
     public function __construct()
     {
@@ -39,9 +34,14 @@ class DuelHandler
 
     // ------------------------------ QUEUE FUNCTIONS --------------------------------
 
+    /**
+     * @param $player
+     * @param string $queue
+     * @param bool $isRanked
+     * @return void
+     */
     public function addPlayerToQueue($player, string $queue, bool $isRanked = false)
     {
-
         $playerHandler = PracticeCore::getPlayerHandler();
 
         if ($playerHandler->isPlayerOnline($player)) {
@@ -74,17 +74,22 @@ class DuelHandler
         }
     }
 
-    public function isPlayerInQueue($player): bool
+    /**
+     * @param $player
+     * @return bool
+     */
+    #[Pure] public function isPlayerInQueue($player): bool
     {
-
         $name = PracticeUtil::getPlayerName($player);
 
         return ($name !== null) and isset($this->queuedPlayers[$name]);
     }
 
+    /**
+     * @return bool
+     */
     public function updateQueues(): bool
     {
-
         $result = false;
 
         $keys = array_keys($this->queuedPlayers);
@@ -127,9 +132,13 @@ class DuelHandler
         return $result;
     }
 
-    public function getNumQueuedFor(string $queue, bool $ranked): int
+    /**
+     * @param string $queue
+     * @param bool $ranked
+     * @return int
+     */
+    #[Pure] public function getNumQueuedFor(string $queue, bool $ranked): int
     {
-
         $result = 0;
 
         foreach ($this->queuedPlayers as $aQueue) {
@@ -140,22 +149,31 @@ class DuelHandler
         return $result;
     }
 
+    /**
+     * @return int
+     */
     public function getNumberOfQueuedPlayers(): int
     {
         return count($this->queuedPlayers);
     }
 
     /**
-     * @return array|QueuedPlayer[]
+     * @return array
      */
     public function getQueuedPlayers(): array
     {
         return $this->queuedPlayers;
     }
 
+    /**
+     * @param $player
+     * @param $opponent
+     * @param bool $isDirect
+     * @param string|null $queue
+     * @return void
+     */
     public function setPlayersMatched($player, $opponent, bool $isDirect = false, string $queue = null): void
     {
-
         if (!$isDirect) {
 
             $playerHandler = PracticeCore::getPlayerHandler();
@@ -212,7 +230,7 @@ class DuelHandler
      * @param $player
      * @return QueuedPlayer|null
      */
-    public function getQueuedPlayer($player)
+    #[Pure] public function getQueuedPlayer($player): ?QueuedPlayer
     {
         $name = PracticeUtil::getPlayerName($player);
         $result = null;
@@ -223,6 +241,10 @@ class DuelHandler
 
     // ------------------------------ MATCHED PLAYER FUNCTIONS --------------------------------
 
+    /**
+     * @param string $queue
+     * @return bool
+     */
     public function isAnArenaOpen(string $queue): bool
     {
         return count($this->getOpenArenas($queue)) > 0;
@@ -230,11 +252,10 @@ class DuelHandler
 
     /**
      * @param string $queue
-     * @return array|DuelArena[]
+     * @return array
      */
     public function getOpenArenas(string $queue): array
     {
-
         $result = [];
 
         $arenaHandler = PracticeCore::getArenaHandler();
@@ -251,9 +272,13 @@ class DuelHandler
         return $result;
     }
 
+    /**
+     * @param $player
+     * @param bool $sendMsg
+     * @return void
+     */
     public function removePlayerFromQueue($player, bool $sendMsg = false): void
     {
-
         if ($this->isPlayerInQueue($player)) {
 
             $queue = $this->getQueuedPlayer($player);
@@ -277,12 +302,20 @@ class DuelHandler
         }
     }
 
-    public function isWaitingForDuelToStart($player): bool
+    /**
+     * @param $player
+     * @return bool
+     */
+    #[Pure] public function isWaitingForDuelToStart($player): bool
     {
         return !is_null($this->getGroupFrom($player));
     }
 
-    public function getGroupFrom($player)
+    /**
+     * @param $player
+     * @return mixed|MatchedGroup|null
+     */
+    #[Pure] public function getGroupFrom($player): mixed
     {
         $str = PracticeUtil::getPlayerName($player);
         $result = null;
@@ -301,7 +334,7 @@ class DuelHandler
      * @param $player
      * @return Player|null
      */
-    public function getMatchedPlayer($player)
+    public function getMatchedPlayer($player): ?Player
     {
         $opponent = null;
 
@@ -316,6 +349,10 @@ class DuelHandler
         return $opponent;
     }
 
+    /**
+     * @param $player
+     * @return bool
+     */
     public function didFindMatch($player): bool
     {
         return !is_null($this->findQueueMatch($player));
@@ -325,9 +362,8 @@ class DuelHandler
      * @param $player
      * @return QueuedPlayer|null
      */
-    private function findQueueMatch($player)
+    private function findQueueMatch($player): ?QueuedPlayer
     {
-
         $opponent = null;
 
         if (isset($player) and $this->isPlayerInQueue($player)) {
@@ -371,16 +407,19 @@ class DuelHandler
     }
 
     /**
-     * @return array|MatchedGroup[]
+     * @return array
      */
     public function getAwaitingGroups(): array
     {
         return $this->matchedGroups;
     }
 
+    /**
+     * @param MatchedGroup $group
+     * @return void
+     */
     public function startDuel(MatchedGroup $group): void
     {
-
         $arena = $this->findRandomArena($group->getQueue());
 
         if (!is_null($arena) and $this->isValidMatched($group)) {
@@ -392,7 +431,6 @@ class DuelHandler
                 $duel = new DuelGroup($group, $arena->getName());
 
                 PracticeCore::getArenaHandler()->setArenaClosed($arena->getName());
-                //PracticeCore::getArenaHandler()->setArenaClosed($arena);
                 $this->duels[] = $duel;
             }
 
@@ -405,9 +443,8 @@ class DuelHandler
      * @param string $queue
      * @return mixed|DuelArena|null
      */
-    private function findRandomArena(string $queue)
+    private function findRandomArena(string $queue): mixed
     {
-
         $result = null;
 
         if ($this->isAnArenaOpen($queue)) {
@@ -421,13 +458,21 @@ class DuelHandler
         return $result;
     }
 
-    private function isValidMatched(MatchedGroup $group): bool
+    /**
+     * @param MatchedGroup $group
+     * @return bool
+     */
+    #[Pure] private function isValidMatched(MatchedGroup $group): bool
     {
         return $this->getMatchedIndexOf($group) !== -1;
     }
 
     // ------------------------------ DUEL PLAYER FUNCTIONS --------------------------------
 
+    /**
+     * @param MatchedGroup $group
+     * @return int
+     */
     private function getMatchedIndexOf(MatchedGroup $group): int
     {
         $index = array_search($group, $this->matchedGroups);
@@ -437,6 +482,10 @@ class DuelHandler
         return $index;
     }
 
+    /**
+     * @param $player
+     * @return bool
+     */
     public function isInDuel($player): bool
     {
         return PracticeCore::getPlayerHandler()->isPlayer($player) and !is_null($this->getDuel($player));
@@ -447,9 +496,8 @@ class DuelHandler
      * @param bool $isArena
      * @return DuelGroup|null
      */
-    public function getDuel($object, bool $isArena = false)
+    public function getDuel($object, bool $isArena = false): ?DuelGroup
     {
-
         $result = null;
 
         $playerHandler = PracticeCore::getPlayerHandler();
@@ -485,14 +533,21 @@ class DuelHandler
         return $result;
     }
 
+    /**
+     * @param $arena
+     * @return bool
+     */
     public function isArenaInUse($arena): bool
     {
         return !is_null($this->getDuel($arena, true));
     }
 
+    /**
+     * @param DuelGroup $group
+     * @return void
+     */
     public function endDuel(DuelGroup $group)
     {
-
         if ($this->isValidDuel($group)) {
             $index = $this->getDuelIndexOf($group);
             unset($this->duels[$index]);
@@ -502,14 +557,21 @@ class DuelHandler
         $this->duels = array_values($this->duels);
     }
 
-    private function isValidDuel(DuelGroup $group): bool
+    /**
+     * @param DuelGroup $group
+     * @return bool
+     */
+    #[Pure] private function isValidDuel(DuelGroup $group): bool
     {
         return $this->getDuelIndexOf($group) !== -1;
     }
 
+    /**
+     * @param DuelGroup $group
+     * @return int
+     */
     private function getDuelIndexOf(DuelGroup $group): int
     {
-
         $index = array_search($group, $this->duels);
         if (is_bool($index) and $index === false)
             $index = -1;
@@ -517,14 +579,21 @@ class DuelHandler
         return $index;
     }
 
+    /**
+     * @return array
+     */
     public function getDuelsInProgress(): array
     {
         return $this->duels;
     }
 
-    public function getNumFightsFor(string $queue, bool $ranked): int
+    /**
+     * @param string $queue
+     * @param bool $ranked
+     * @return int
+     */
+    #[Pure] public function getNumFightsFor(string $queue, bool $ranked): int
     {
-
         $result = 0;
 
         foreach ($this->duels as $duel) {
@@ -535,6 +604,10 @@ class DuelHandler
         return $result;
     }
 
+    /**
+     * @param $player
+     * @return bool
+     */
     public function isASpectator($player): bool
     {
         $duel = $this->getDuelFromSpec($player);
@@ -545,9 +618,8 @@ class DuelHandler
      * @param $spec
      * @return null|DuelGroup
      */
-    public function getDuelFromSpec($spec)
+    public function getDuelFromSpec($spec): ?DuelGroup
     {
-
         $result = null;
 
         $playerHandler = PracticeCore::getPlayerHandler();

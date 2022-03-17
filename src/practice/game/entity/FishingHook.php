@@ -4,38 +4,53 @@ declare(strict_types=1);
 
 namespace practice\game\entity;
 
+use JetBrains\PhpStorm\Pure;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntitySizeInfo;
+use pocketmine\entity\Human;
+use pocketmine\entity\Location;
 use pocketmine\entity\projectile\Projectile;
-use pocketmine\event\entity\EntityCombustByEntityEvent;
-use pocketmine\event\entity\EntityDamageByChildEntityEvent;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
-use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\item\Item;
+use pocketmine\item\ItemIds;
 use pocketmine\math\RayTraceResult;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
-use practice\PracticeCore;
+use pocketmine\network\mcpe\protocol\types\ActorEvent;
+use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
+use pocketmine\player\Player;
+use pocketmine\Server;
+use practice\player\PracticePlayer;
 
 class FishingHook extends Projectile
 {
-    public const WAIT_CHANCE = 120;
-    public const CHANCE = 40;
+    /** @var float */
+    protected $gravity = 0.08;
+    /** @var float */
+    protected $drag = 0.05;
+    /** @var bool */
+    protected bool $caught = false;
+    /** @var Entity|null */
+    protected ?Entity $attachedEntity = null;
 
-    public bool $chance = false;
-    public int $waitChance = 240;
-    public bool $attracted = false;
-    public int $attractTimer = 0;
-    public bool $caught = false;
-    public int $caughtTimer = 0;
-    public mixed $fish = null;
-    public mixed $rod = null;
-    public float $width = 0.2;
-    public float $height = 0.2;
-    public $gravity = 0.08;
-    public $drag = 0.05;
+    /**
+     * @param Location $location
+     * @param Entity|null $shootingEntity
+     * @param CompoundTag|null $nbt
+     */
+    public function __construct(Location $location, ?Entity $shootingEntity, ?CompoundTag $nbt = null)
+    {
+        parent::__construct($location, $shootingEntity, $nbt);
+        $this->motion->x = -sin(deg2rad($location->yaw)) * cos(deg2rad($location->pitch));
+        $this->motion->y = -sin(deg2rad($location->pitch));
+        $this->motion->z = cos(deg2rad($location->yaw)) * cos(deg2rad($location->pitch));
+    }
 
-    /* @var Entity|null */
-    private ?Entity $attachedEntity = null;
+    /**
+     * @return string
+     */
+    public static function getNetworkTypeId(): string
+    {
+        return EntityIds::FISHING_HOOK;
+    }
 
     /**
      * @param int $currentTick
@@ -43,139 +58,95 @@ class FishingHook extends Projectile
      */
     public function onUpdate(int $currentTick): bool
     {
-        if ($this->isFlaggedForDespawn() or !$this->isAlive()) {
+        if ($this->isFlaggedForDespawn() || !$this->isAlive()) {
             return false;
         }
-
-        $this->timings->startTiming();
-
         $update = parent::onUpdate($currentTick);
-
         if (!$this->isCollidedVertically) {
             $this->motion->x *= 1.13;
             $this->motion->z *= 1.13;
             $this->motion->y -= $this->gravity * -0.04;
             if ($this->isUnderwater()) {
-
                 $this->motion->z = 0;
                 $this->motion->x = 0;
-                $difference = floatval($this->getWaterHeight() - $this->getPosition()->y);
-
-                if ($difference > 0.15) $this->motion->y += 0.1;
-                else $this->motion->y += 0.01;
+                $difference = (float)($this->getWaterHeight() - $this->getPosition()->y);
+                if ($difference > 0.15) {
+                    $this->motion->y += 0.1;
+                } else {
+                    $this->motion->y += 0.01;
+                }
             }
             $update = true;
-        } elseif ($this->isCollided and $this->keepMovement === true) {
+        } elseif ($this->isCollided && $this->keepMovement) {
             $this->motion->x = 0;
             $this->motion->y = 0;
             $this->motion->z = 0;
             $this->keepMovement = false;
             $update = true;
         }
-
-        if ($this->isOnGround()) $this->motion->y = 0;
-
-        if ($this->attachedEntity !== null) {
-
-            $pos = $this->attachedEntity->asPosition();
-
-            if ($pos !== $this->getPosition()) {
-                $this->setPosition($pos->add(0, 1));
-            }
-
-            $this->setMotion($this->attachedEntity->getMotion());
+        if ($this->isOnGround()) {
+            $this->motion->y = 0;
         }
-
-        $source = $this->getOwningEntity();
-
-        if (!is_null($source) and $source instanceof Player) {
-
-            $p = $source->getPlayer();
-            $inv = $p->getInventory();
-            $itemInHand = $inv->getItemInHand();
-
-            $kill = false;
-
-            if ($source->distance($this) > 35)
-                $kill = true;
-            elseif ($itemInHand->getId() !== Item::FISHING_ROD)
-                $kill = true;
-
-            if ($kill === true) {
-
-                $this->kill();
+        if (($owner = $this->getOwningEntity()) != null && $owner instanceof Human) {
+            $itemInHand = $owner->getInventory()->getItemInHand();
+            if ($owner->getPosition()->distance($this->getPosition()) > 35 || $itemInHand->getId() !== ItemIds::FISHING_ROD || $this->attachedEntity !== null) {
                 $this->close();
-
-                $playerHandler = PracticeCore::getPlayerHandler();
-
-                if ($playerHandler->isPlayerOnline($p)) {
-                    $pracPlayer = $playerHandler->getPlayer($p);
-                    if ($pracPlayer->isFishing()) $pracPlayer->stopFishing();
+                if($owner instanceof PracticePlayer){
+                    $owner->stopFishing();
                 }
             }
         }
-
-        $this->timings->stopTiming();
-
         return $update;
     }
 
+    /**
+     * @return int
+     */
     public function getWaterHeight(): int
     {
-        $floorY = $this->getFloorY();
-        $result = $floorY;
-        for ($y = $floorY; $y < 256; $y++) {
-            $id = $this->getLevel()->getBlockIdAt($this->getFloorX(), $y, $this->getFloorZ());
-            if ($id === 0) {
-                $result = $y;
-                break;
+        $pos = $this->getPosition();
+        $floorY = $pos->getFloorY();
+        for ($y = $pos->getFloorY(); $y < 256; $y++) {
+            if ($this->getWorld()->getBlockAt($pos->getFloorX(), $y, $pos->getFloorZ())->getId() === 0) {
+                return $y;
             }
         }
-        return $result;
+        return $floorY;
     }
 
-    /*public function fishBites() : void {
-        $this->broadcastEntityEvent(EntityEventPacket::FISH_HOOK_HOOK, 0, $this->getLevel()->getPlayers());
-        $this->broadcastEntityEvent(EntityEventPacket::FISH_HOOK_BUBBLE, 0, $this->getLevel()->getPlayers());
-        $this->broadcastEntityEvent(EntityEventPacket::FISH_HOOK_TEASE, 0, $this->getLevel()->getPlayers());
-        $rand = new Random();
-        for($i = 0; $i < 5; $i++) {
-            $this->getLevel()->addParticle(new BubbleParticle(new Vector3($this->x + $rand->nextFloat() * 0.5 - 0.25,  $this->getWaterHeight(), $this->z + $rand->nextFloat() * 0.5 - 0.25)));
-        }
-    }
-
-    public function spawnFish() : void {
-        $rand = new Random();
-        $this->fish = new Vector3($this->x + ($rand->nextFloat() * 1.2 + 1) * ($rand->nextBoolean() ? -1 : 1), $this->getWaterHeight(), $this->z + ($rand->nextFloat() * 1.2 + 1) * ($rand->nextBoolean() ? -1 : 1));
-    }
-
-    public function attractFish() : bool {
-        $multiply = 0.1;
-        $result = false;
-        if($this->fish instanceof Vector3) {
-            $this->fish->setComponents($this->fish->x + ($this->x - $this->fish->x) * $multiply, $this->fish->y, $this->fish->z + ($this->z - $this->fish->z) * $multiply);
-            $rand = rand(0, 100);
-            if($rand < 85) {
-                $this->getLevel()->addParticle(new WaterParticle($this->fish));
-            }
-            $dist = abs(sqrt($this->x * $this->x + $this->z * $this->z) - sqrt($this->fish->x * $this->fish->x - $this->fish->z * $this->fish->z));
-            $result = $dist < 0.15;
-        }
-        return $result;
-    }*/
-
+    /**
+     * @return void
+     */
     public function reelLine(): void
     {
-        $e = $this->getOwningEntity();
-
-        if ($e instanceof Player and $this->caught === true) {
-            $this->broadcastEntityEvent(ActorEventPacket::FISH_HOOK_TEASE, 0, $this->getLevel()->getPlayers());
+        $owner = $this->getOwningEntity();
+        if ($owner instanceof Human && $this->caught) {
+            Server::getInstance()->broadcastPackets($owner->getViewers(), [ActorEventPacket::create($this->getId(), ActorEvent::FISH_HOOK_TEASE, 0)]);
         }
-
         if (!$this->closed) {
-            $this->kill();
             $this->close();
         }
+    }
+
+    /**
+     * @param Entity $entity
+     * @return bool
+     */
+    public function canCollideWith(Entity $entity): bool
+    {
+        $player = $this->getOwningEntity();
+        if ($player instanceof Player && $entity instanceof Player && $player->getName() !== $entity->getName()) {
+            return false;
+        }
+        return parent::canCollideWith($entity);
+    }
+
+    /**
+     * @return EntitySizeInfo
+     */
+    #[Pure] protected function getInitialSizeInfo(): EntitySizeInfo
+    {
+        return new EntitySizeInfo(0.25, 0.25);
     }
 
     /**
@@ -183,39 +154,9 @@ class FishingHook extends Projectile
      * @param RayTraceResult $hitResult
      * @return void
      */
-    public function onHitEntity(Entity $entityHit, RayTraceResult $hitResult): void
+    protected function onHitEntity(Entity $entityHit, RayTraceResult $hitResult): void
     {
-        $damage = $this->getResultDamage();
-
+        parent::onHitEntity($entityHit, $hitResult);
         $this->attachedEntity = $entityHit;
-
-        if ($damage >= 0) {
-
-            if ($this->getOwningEntity() === null) {
-                $ev = new EntityDamageByEntityEvent($this, $entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
-            } else {
-                $ev = new EntityDamageByChildEntityEvent($this->getOwningEntity(), $this, $entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
-            }
-
-            $entityHit->attack($ev);
-
-            if ($this->isOnFire()) {
-                $ev = new EntityCombustByEntityEvent($this, $entityHit, 5);
-                $ev->call();
-                if (!$ev->isCancelled()) {
-                    $entityHit->setOnFire($ev->getDuration());
-                }
-            }
-        }
-    }
-
-    protected function getInitialSizeInfo(): EntitySizeInfo
-    {
-        // TODO: Implement getInitialSizeInfo() method.
-    }
-
-    public static function getNetworkTypeId(): string
-    {
-        // TODO: Implement getNetworkTypeId() method.
     }
 }

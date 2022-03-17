@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-04-29
- * Time: 09:28
- */
 
 namespace practice\duels;
 
@@ -15,11 +9,10 @@ use practice\PracticeUtil;
 
 class IvsIHandler
 {
-
     /* @var LoadedRequest[] */
-    private $loadedRequests;
+    private array $loadedRequests;
     /* @var Request[] */
-    private $requests;
+    private array $requests;
 
     public function __construct()
     {
@@ -27,17 +20,24 @@ class IvsIHandler
         $this->loadedRequests = [];
     }
 
+    /**
+     * @param string $player
+     * @param string $requested
+     * @return void
+     */
     public function loadRequest(string $player, string $requested): void
     {
-
         $group = new LoadedRequest($player, $requested);
 
         $this->loadedRequests[] = $group;
     }
 
+    /**
+     * @param $object
+     * @return void
+     */
     public function cancelRequest($object): void
     {
-
         if (PracticeCore::getPlayerHandler()->isPlayer($object)) {
             if ($this->isLoadingRequest($object)) {
                 $request = $this->getLoadedRequest($object);
@@ -58,6 +58,10 @@ class IvsIHandler
         }
     }
 
+    /**
+     * @param $player
+     * @return bool
+     */
     public function isLoadingRequest($player): bool
     {
         return !is_null($this->getLoadedRequest($player));
@@ -67,9 +71,8 @@ class IvsIHandler
      * @param $player
      * @return LoadedRequest|null
      */
-    public function getLoadedRequest($player)
+    public function getLoadedRequest($player): ?LoadedRequest
     {
-
         $request = null;
 
         $name = PracticeUtil::getPlayerName($player);
@@ -95,9 +98,12 @@ class IvsIHandler
         return $request;
     }
 
+    /**
+     * @param $object
+     * @return int
+     */
     private function indexOfLoadedRequest($object): int
     {
-
         $index = array_search($object, $this->loadedRequests);
 
         if (is_bool($index) and $index === false)
@@ -106,6 +112,10 @@ class IvsIHandler
         return $index;
     }
 
+    /**
+     * @param $request
+     * @return int
+     */
     private function indexOfRequest($request): int
     {
         $key = array_search($request, $this->requests);
@@ -114,9 +124,13 @@ class IvsIHandler
         return $key;
     }
 
+    /**
+     * @param $requestor
+     * @param $requested
+     * @return void
+     */
     public function sendRequest($requestor, $requested): void
     {
-
         $playerHandler = PracticeCore::getPlayerHandler();
 
         if ($playerHandler->isPlayerOnline($requestor) and $playerHandler->isPlayerOnline($requested)) {
@@ -147,6 +161,11 @@ class IvsIHandler
         }
     }
 
+    /**
+     * @param $requestor
+     * @param $requested
+     * @return bool
+     */
     public function hasLoadedRequest($requestor, $requested): bool
     {
         $result = false;
@@ -163,9 +182,13 @@ class IvsIHandler
         return $result;
     }
 
+    /**
+     * @param $requested
+     * @param $requestor
+     * @return void
+     */
     public function acceptRequest($requested, $requestor): void
     {
-
         if ($this->hasPendingRequest($requested, $requestor)) {
 
             $request = $this->getRequest($requested, $requestor);
@@ -190,6 +213,11 @@ class IvsIHandler
         }
     }
 
+    /**
+     * @param $requested
+     * @param $requestor
+     * @return bool
+     */
     public function hasPendingRequest($requested, $requestor): bool
     {
         return !is_null($this->getRequest($requested, $requestor));
@@ -200,9 +228,8 @@ class IvsIHandler
      * @param $requestor
      * @return Request|null
      */
-    public function getRequest($requested, $requestor)
+    public function getRequest($requested, $requestor): ?Request
     {
-
         $result = null;
 
         $playerHandler = PracticeCore::getPlayerHandler();
@@ -228,25 +255,19 @@ class IvsIHandler
         return $result;
     }
 
+    /**
+     * @return void
+     */
     public function update()
     {
-
         $size = count($this->requests) - 1;
-
         for ($i = $size; $i > -1; $i--) {
-
             if (isset($this->requests[$i])) {
-
                 $request = $this->requests[$i];
-
                 $update = $request->update();
-
                 if ($update === true) {
-
                     $request->setExpired();
-
                     unset($this->requests[$i]);
-
                     $this->requests = array_values($this->requests);
                 }
             }

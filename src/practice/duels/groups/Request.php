@@ -1,33 +1,33 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-04-29
- * Time: 09:35
- */
 
 namespace practice\duels\groups;
 
+use JetBrains\PhpStorm\Pure;
 use practice\player\PracticePlayer;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
 class Request
 {
-
+    /** @var int */
     private const MAX_WAIT_SECONDS = 120;
 
-    private $player;
+    /** @var string|null */
+    private ?string $player;
+    /** @var string|null */
+    private ?string $requested;
+    /** @var string */
+    private string $queue;
+    /** @var int */
+    private int $secsFromRequest;
 
-    private $requested;
-
-    private $queue;
-
-    private $secsFromRequest;
-
-    public function __construct($requestor, $requested, string $queue)
+    /**
+     * @param $requestor
+     * @param $requested
+     * @param string $queue
+     */
+    #[Pure] public function __construct($requestor, $requested, string $queue)
     {
-
         if (!is_null(PracticeUtil::getPlayerName($requestor))) {
             $this->player = PracticeUtil::getPlayerName($requestor);
         }
@@ -41,6 +41,11 @@ class Request
         $this->queue = $queue;
     }
 
+    /**
+     * @param PracticePlayer $p
+     * @param $requestedPlayer
+     * @return bool
+     */
     public static function canSend(PracticePlayer $p, $requestedPlayer): bool
     {
         $result = false;
@@ -63,9 +68,11 @@ class Request
         return $result;
     }
 
+    /**
+     * @return bool
+     */
     public function update(): bool
     {
-
         $this->secsFromRequest++;
 
         $delete = false;
@@ -79,21 +86,34 @@ class Request
         return $delete;
     }
 
+    /**
+     * @return bool
+     */
     public function isRequestedOnline(): bool
     {
         return PracticeCore::getPlayerHandler()->isPlayerOnline($this->requested);
     }
 
+    /**
+     * @return bool
+     */
     public function isRequestorOnline(): bool
     {
         return PracticeCore::getPlayerHandler()->isPlayerOnline($this->player);
     }
 
+    /**
+     * @return string
+     */
     public function getQueue(): string
     {
         return $this->queue;
     }
 
+    /**
+     * @param $player
+     * @return bool
+     */
     public function isTheRequestor($player): bool
     {
         $result = false;
@@ -106,11 +126,18 @@ class Request
         return $result;
     }
 
-    public function getRequestor()
+    /**
+     * @return PracticePlayer|null
+     */
+    public function getRequestor(): ?PracticePlayer
     {
         return PracticeCore::getPlayerHandler()->getPlayer($this->player);
     }
 
+    /**
+     * @param $player
+     * @return bool
+     */
     public function isTheRequested($player): bool
     {
         $result = false;
@@ -123,9 +150,11 @@ class Request
         return $result;
     }
 
+    /**
+     * @return void
+     */
     public function setExpired(): void
     {
-
         if ($this->isRequestorOnline()) {
             $p = $this->getRequestor();
             if (!$p->isInDuel() and !PracticeCore::getDuelHandler()->isWaitingForDuelToStart($p->getPlayer())) {
@@ -141,24 +170,35 @@ class Request
         }
     }
 
+    /**
+     * @return string
+     */
     public function getRequestedName(): string
     {
         return $this->requested;
     }
 
-    public function getRequested()
+    /**
+     * @return PracticePlayer|null
+     */
+    public function getRequested(): ?PracticePlayer
     {
         return PracticeCore::getPlayerHandler()->getPlayer($this->requested);
     }
 
+    /**
+     * @return string
+     */
     public function getRequestorName(): string
     {
         return $this->player;
     }
 
+    /**
+     * @return bool
+     */
     public function canAccept(): bool
     {
-
         $result = false;
 
         if ($this->isRequestedOnline()) {
@@ -178,9 +218,12 @@ class Request
         return $result;
     }
 
-    public function equals($object): bool
+    /**
+     * @param $object
+     * @return bool
+     */
+    #[Pure] public function equals($object): bool
     {
-
         $result = false;
 
         if ($object instanceof Request) {

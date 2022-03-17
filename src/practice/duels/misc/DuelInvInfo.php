@@ -1,49 +1,51 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-05-01
- * Time: 13:38
- */
 
 declare(strict_types=1);
 
 namespace practice\duels\misc;
 
-
+use JetBrains\PhpStorm\Pure;
 use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
+use pocketmine\item\ItemIds;
+use pocketmine\item\VanillaItems;
+use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 use practice\PracticeUtil;
 
 class DuelInvInfo
 {
+    /** @var array */
+    private array $items;
+    /** @var array */
+    private array $armor;
+    /** @var int */
+    private int $health;
+    /** @var int */
+    private int $hunger;
+    /** @var int */
+    private int $numHits;
+    /** @var string */
+    private string $playerName;
+    /** @var string */
+    private string $queue;
+    /** @var int */
+    private int $potionCount;
+    /** @var int */
+    private int $soupCount;
 
-    private $items;
-
-    private $armor;
-
-    private $health;
-
-    private $hunger;
-
-    private $numHits;
-
-    private $playerName;
-
-    private $queue;
-
-    private $potionCount;
-
-    private $soupCount;
-
+    /**
+     * @param Player $player
+     * @param string $queue
+     * @param int $numHits
+     */
     public function __construct(Player $player, string $queue, int $numHits)
     {
-
         $this->queue = $queue;
         $this->items = [];
         $this->armor = [];
         $this->health = intval(round($player->getHealth()));
-        $this->hunger = intval(round($player->getFood()));
+        $this->hunger = intval(round($player->getHungerManager()->getFood()));
         $this->playerName = $player->getName();
 
         $this->potionCount = 0;
@@ -51,7 +53,7 @@ class DuelInvInfo
 
         $this->numHits = $numHits;
 
-        $arr = PracticeUtil::inventoryToArray($player->getPlayer(), true);
+        $arr = PracticeUtil::inventoryToArray($player, true);
 
         $itemArr = $arr["items"];
         $armorArr = $arr["armor"];
@@ -71,29 +73,38 @@ class DuelInvInfo
         foreach ($itemArr as $item) {
             if ($item instanceof Item) {
                 $this->items[] = $item;
-                if ($this->displayPots() === true and $item->getId() === Item::SPLASH_POTION) $this->potionCount++;
-                elseif ($this->displaySoup() === true and $item->getId() === Item::MUSHROOM_STEW) $this->soupCount++;
+                if ($this->displayPots() === true and $item->getId() === ItemIds::SPLASH_POTION) $this->potionCount++;
+                elseif ($this->displaySoup() === true and $item->getId() === ItemIds::MUSHROOM_STEW) $this->soupCount++;
             }
         }
     }
 
-    private function displayPots(): bool
+    /**
+     * @return bool
+     */
+    #[Pure] private function displayPots(): bool
     {
         return PracticeUtil::equals_string($this->queue, "NoDebuff", "nodebuff", "NODEBUFF", "PotPvP", "PotionPvP", "No Debuff", "No-Debuff");
     }
 
-    private function displaySoup(): bool
+    /**
+     * @return bool
+     */
+    #[Pure] private function displaySoup(): bool
     {
         return PracticeUtil::equals_string($this->queue, "SoupPvP", "Soup", "soup", "SOUP", "Soup-PvP", "Soup PvP");
     }
 
+    /**
+     * @return string
+     */
     public function getPlayerName(): string
     {
         return $this->playerName;
     }
 
     /**
-     * @return array|Item[]
+     * @return array
      */
     public function getArmor(): array
     {
@@ -101,35 +112,32 @@ class DuelInvInfo
     }
 
     /**
-     * @return array|Item[]
+     * @return array
      */
     public function getItems(): array
     {
         return $this->items;
     }
 
+    /**
+     * @return Item
+     */
     public function getItem(): Item
     {
-        return Item::get(Item::NETHER_STAR, 0, 1)->setCustomName(TextFormat::RED . $this->playerName);
+        return VanillaItems::NETHER_STAR()->setCustomName(TextFormat::RED . $this->playerName);
     }
 
     /**
-     * @return array|Item[]
+     * @return array
      */
     public function getStatsItems(): array
     {
-
-        $head = Item::get(Item::MOB_HEAD, 3, 1)->setCustomName(TextFormat::YELLOW . $this->playerName . TextFormat::RESET);
-
-        $healthItem = Item::get(Item::GLISTERING_MELON, 1, PracticeUtil::getProperCount($this->getHealth()))->setCustomName(TextFormat::RED . "$this->health HP");
-
-        $numHitsItem = Item::get(Item::PAPER, 0, PracticeUtil::getProperCount($this->getNumHits()))->setCustomName(TextFormat::GOLD . "$this->numHits Hits");
-
-        $hungerItem = Item::get(Item::STEAK, 0, PracticeUtil::getProperCount($this->getHunger()))->setCustomName(TextFormat::GREEN . "$this->hunger Hunger-Points");
-
-        $numPots = Item::get(Item::SPLASH_POTION, 21, PracticeUtil::getProperCount($this->potionCount))->setCustomName(TextFormat::AQUA . "$this->potionCount Pots");
-
-        $numSoup = Item::get(Item::MUSHROOM_STEW, 0, PracticeUtil::getProperCount($this->soupCount))->setCustomName(TextFormat::BLUE . "$this->soupCount Soup");
+        $head = VanillaItems::ZOMBIE_HEAD()->setCustomName(TextFormat::YELLOW . $this->playerName . TextFormat::RESET);
+        $healthItem = (new ItemFactory)->get(ItemIds::GLISTERING_MELON, 1, PracticeUtil::getProperCount($this->getHealth()))->setCustomName(TextFormat::RED . "$this->health HP");
+        $numHitsItem = (new ItemFactory)->get(ItemIds::PAPER, 0, PracticeUtil::getProperCount($this->getNumHits()))->setCustomName(TextFormat::GOLD . "$this->numHits Hits");
+        $hungerItem = (new ItemFactory)->get(ItemIds::STEAK, 0, PracticeUtil::getProperCount($this->getHunger()))->setCustomName(TextFormat::GREEN . "$this->hunger Hunger-Points");
+        $numPots = (new ItemFactory)->get(ItemIds::SPLASH_POTION, 21, PracticeUtil::getProperCount($this->potionCount))->setCustomName(TextFormat::AQUA . "$this->potionCount Pots");
+        $numSoup = (new ItemFactory)->get(ItemIds::MUSHROOM_STEW, 0, PracticeUtil::getProperCount($this->soupCount))->setCustomName(TextFormat::BLUE . "$this->soupCount Soup");
 
         $arr = [$head, $healthItem, $hungerItem, $numHitsItem];
 

@@ -1,32 +1,34 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-04-22
- * Time: 13:37
- */
 
 declare(strict_types=1);
 
 namespace practice\duels\groups;
 
-
+use JetBrains\PhpStorm\Pure;
+use practice\player\PracticePlayer;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
 class MatchedGroup
 {
-    private $playerName;
+    /** @var string */
+    private string $playerName;
+    /** @var string */
+    private string $opponentName;
+    /** @var string */
+    private string $queue;
 
-    private $opponentName;
+    /** @var bool */
+    private bool $ranked;
 
-    private $queue;
-
-    private $ranked;
-
-    public function __construct($player, $opponent, string $queue, bool $ranked = false)
+    /**
+     * @param $player
+     * @param $opponent
+     * @param string $queue
+     * @param bool $ranked
+     */
+    #[Pure] public function __construct($player, $opponent, string $queue, bool $ranked = false)
     {
-
         $pName = PracticeUtil::getPlayerName($player);
         $oName = PracticeUtil::getPlayerName($opponent);
 
@@ -37,34 +39,53 @@ class MatchedGroup
         $this->ranked = $ranked;
     }
 
+    /**
+     * @return bool
+     */
     public function isRanked(): bool
     {
         return $this->ranked;
     }
 
-    public function isPlayerOnline()
+    /**
+     * @return bool
+     */
+    public function isPlayerOnline(): bool
     {
         $p = $this->getPlayer();
         return !is_null($p) and $p->isOnline();
     }
 
-    public function getPlayer()
+    /**
+     * @return PracticePlayer|null
+     */
+    public function getPlayer(): ?PracticePlayer
     {
         return PracticeCore::getPlayerHandler()->getPlayer($this->playerName);
     }
 
-    public function isOpponentOnline()
+    /**
+     * @return bool
+     */
+    public function isOpponentOnline(): bool
     {
         $p = $this->getOpponent();
         return !is_null($p) and $p->isOnline();
     }
 
-    public function getOpponent()
+    /**
+     * @return PracticePlayer|null
+     */
+    public function getOpponent(): ?PracticePlayer
     {
         return PracticeCore::getPlayerHandler()->getPlayer($this->opponentName);
     }
 
-    public function equals($object): bool
+    /**
+     * @param $object
+     * @return bool
+     */
+    #[Pure] public function equals($object): bool
     {
         $result = false;
         if ($object instanceof MatchedGroup) {
@@ -75,16 +96,25 @@ class MatchedGroup
         return $result;
     }
 
+    /**
+     * @return string
+     */
     public function getPlayerName(): string
     {
         return $this->playerName;
     }
 
+    /**
+     * @return string
+     */
     public function getOpponentName(): string
     {
         return $this->opponentName;
     }
 
+    /**
+     * @return string
+     */
     public function getQueue(): string
     {
         return $this->queue;

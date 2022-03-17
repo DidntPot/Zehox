@@ -1,33 +1,39 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-05-14
- * Time: 15:41
- */
 
 namespace practice\duels\misc;
 
+use JetBrains\PhpStorm\Pure;
 
 class DuelPlayerHit
 {
+    /** @var string */
+    private string $hitter;
+    /** @var int */
+    private int $tick;
 
-    private $hitter;
-
-    private $tick;
-
+    /**
+     * @param string $hitter
+     * @param int $tick
+     */
     public function __construct(string $hitter, int $tick)
     {
         $this->tick = $tick;
         $this->hitter = $hitter;
     }
 
+    /**
+     * @return string
+     */
     public function getHitter(): string
     {
         return $this->hitter;
     }
 
-    public function equals($object): bool
+    /**
+     * @param $object
+     * @return bool
+     */
+    #[Pure] public function equals($object): bool
     {
         $result = false;
         if ($object instanceof DuelPlayerHit) {
@@ -36,9 +42,11 @@ class DuelPlayerHit
         return $result;
     }
 
+    /**
+     * @return int
+     */
     public function getTick(): int
     {
         return $this->tick;
     }
-
 }

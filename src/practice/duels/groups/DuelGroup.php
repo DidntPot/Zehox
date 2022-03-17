@@ -1,18 +1,15 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-04-22
- * Time: 13:36
- */
 
 declare(strict_types=1);
 
 namespace practice\duels\groups;
 
+use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\Pure;
 use pocketmine\block\Block;
-use pocketmine\level\Position;
+use pocketmine\block\BlockLegacyIds;
 use pocketmine\utils\TextFormat;
+use pocketmine\world\Position;
 use practice\arenas\DuelArena;
 use practice\duels\misc\DuelInvInfo;
 use practice\duels\misc\DuelPlayerHit;
@@ -24,57 +21,82 @@ use practice\scoreboard\ScoreboardUtil;
 
 class DuelGroup
 {
-
+    /** @var string */
     public const NONE = "None";
-
+    /** @var string */
     private const NO_SPEC_MSG = "spectators.none";
 
+    /** @var int */
     public const MAX_COUNTDOWN_SEC = 5;
-
+    /** @var int */
     public const MAX_DURATION_MIN = 30;
-
+    /** @var int */
     public const MAX_END_DELAY_SEC = 1;
 
-    private $playerName;
-    private $opponentName;
-    private $arenaName;
-    private $winnerName;
-    private $loserName;
+    /** @var string */
+    private string $playerName;
+    /** @var string */
+    private string $opponentName;
+    /** @var string */
+    private string $arenaName;
+    /** @var string */
+    private string $winnerName;
+    /** @var string */
+    private string $loserName;
 
-    private $queue;
+    /** @var string */
+    private string $queue;
 
-    private $origOppTag;
-    private $origPlayerTag;
+    /** @var string */
+    private string $origOppTag;
+    /** @var string */
+    private string $origPlayerTag;
 
-    private $currentTick;
-    private $countdownTick;
-    private $endTick;
+    /** @var int */
+    private int $currentTick;
+    /** @var int */
+    private int $countdownTick;
+    /** @var int */
+    private int $endTick;
 
-    private $ranked;
+    /** @var bool */
+    private bool $ranked;
 
-    private $started;
-    private $ended;
+    /** @var bool */
+    private bool $started;
+    /** @var bool */
+    private bool $ended;
 
     /* @var DuelSpectator[] */
-    private $spectators;
+    private array $spectators;
 
-    private $blocks;
-
-    /* @var DuelPlayerHit[] */
-    private $playerHits;
+    /** @var array */
+    private array $blocks;
 
     /* @var DuelPlayerHit[] */
-    private $oppHits;
+    private array $playerHits;
 
-    private $fightingTick;
+    /* @var DuelPlayerHit[] */
+    private array $oppHits;
 
-    private $arena;
+    /** @var int */
+    private int $fightingTick;
 
-    private $opponentDevice;
-    private $playerDevice;
+    /** @var mixed */
+    private mixed $arena;
 
-    private $maxCountdownTicks;
+    /** @var int */
+    private int $opponentDevice;
+    /** @var int */
+    private int $playerDevice;
 
+    /** @var int */
+    private int $maxCountdownTicks;
+
+    /**
+     * @param MatchedGroup $group
+     * @param string $arena
+     */
     public function __construct(MatchedGroup $group, string $arena)
     {
         $this->playerName = $group->getPlayerName();
@@ -136,9 +158,13 @@ class DuelGroup
         $this->blocks = [];
     }
 
+    /**
+     * @param string $spec
+     * @param bool $msg
+     * @return void
+     */
     public function removeSpectator(string $spec, bool $msg = false): void
     {
-
         if ($this->isSpectator($spec)) {
 
             $p = PracticeCore::getPlayerHandler()->getPlayer($spec);
@@ -161,14 +187,23 @@ class DuelGroup
         }
     }
 
+    /**
+     * @param string $spec
+     * @return bool
+     */
     public function isSpectator(string $spec): bool
     {
         return isset($this->spectators[$spec]);
     }
 
+    /**
+     * @param string $msg
+     * @param bool $sendSpecs
+     * @param $player
+     * @return void
+     */
     public function broadcastMsg(string $msg, bool $sendSpecs = false, $player = null): void
     {
-
         $oppMsg = $msg;
         $pMsg = $msg;
 
@@ -219,6 +254,9 @@ class DuelGroup
         }
     }
 
+    /**
+     * @return bool
+     */
     private function isOpponentOnline(): bool
     {
         return !is_null($this->getOpponent()) and $this->getOpponent()->isOnline();
@@ -227,11 +265,14 @@ class DuelGroup
     /**
      * @return PracticePlayer|null
      */
-    public function getOpponent()
+    public function getOpponent(): ?PracticePlayer
     {
         return PracticeCore::getPlayerHandler()->getPlayer($this->opponentName);
     }
 
+    /**
+     * @return bool
+     */
     private function isPlayerOnline(): bool
     {
         return !is_null($this->getPlayer()) and $this->getPlayer()->isOnline();
@@ -240,17 +281,16 @@ class DuelGroup
     /**
      * @return PracticePlayer|null
      */
-    public function getPlayer()
+    public function getPlayer(): ?PracticePlayer
     {
         return PracticeCore::getPlayerHandler()->getPlayer($this->playerName);
     }
 
     /**
-     * @return array|DuelSpectator[]
+     * @return array
      */
     private function getSpectators(): array
     {
-
         $result = [];
 
         $keys = array_keys($this->spectators);
@@ -266,38 +306,62 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @param PracticePlayer $p
+     * @param PracticePlayer $o
+     * @return void
+     */
     private function placeInDuel(PracticePlayer $p, PracticePlayer $o): void
     {
-
         $p->placeInDuel($this);
         $o->placeInDuel($this);
     }
 
+    /**
+     * @return bool
+     */
     public function isRanked(): bool
     {
         return $this->ranked;
     }
 
+    /**
+     * @param string $nameTag
+     * @return void
+     */
     public function setONameTag(string $nameTag): void
     {
         $this->origOppTag = $nameTag;
     }
 
+    /**
+     * @param string $nameTag
+     * @return void
+     */
     public function setPNameTag(string $nameTag): void
     {
         $this->origPlayerTag = $nameTag;
     }
 
+    /**
+     * @return string
+     */
     public function getPlayerName(): string
     {
         return $this->playerName;
     }
 
+    /**
+     * @return string
+     */
     public function getOpponentName(): string
     {
         return $this->opponentName;
     }
 
+    /**
+     * @return void
+     */
     public function update(): void
     {
 
@@ -322,7 +386,6 @@ class DuelGroup
             if ($this->countdownTick % 20 === 0 and $this->countdownTick !== 0) {
 
                 $second = self::MAX_COUNTDOWN_SEC - PracticeUtil::ticksToSeconds($this->countdownTick);
-                $msg = null;
 
                 if ($second !== 0) {
                     $msg = PracticeUtil::str_replace(PracticeUtil::getMessage("duels.start.countdown"), ["%seconds%" => "$second"]);
@@ -398,6 +461,9 @@ class DuelGroup
         $this->currentTick++;
     }
 
+    /**
+     * @return bool
+     */
     public function arePlayersOnline(): bool
     {
         $result = false;
@@ -409,6 +475,10 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @param bool $disablePlugin
+     * @return void
+     */
     public function endDuelPrematurely(bool $disablePlugin = false): void
     {
 
@@ -439,25 +509,37 @@ class DuelGroup
         $this->endDuel($premature, $disablePlugin);
     }
 
+    /**
+     * @param bool $result
+     * @return void
+     */
     private function setDuelEnded(bool $result = true)
     {
         $this->ended = $result;
         $this->endTick = $this->endTick == -1 ? $this->currentTick : $this->endTick;
     }
 
+    /**
+     * @return bool
+     */
     public function isDuelRunning(): bool
     {
         return $this->started === true and $this->ended === false;
     }
 
+    /**
+     * @return bool
+     */
     public function didDuelEnd(): bool
     {
         return $this->started === true and $this->ended === true;
     }
 
-    private function getOfflinePlayers(): array
+    /**
+     * @return string[]
+     */
+    #[ArrayShape(["winner" => "string", "loser" => "string"])] private function getOfflinePlayers(): array
     {
-
         $result = ["winner" => self::NONE, "loser" => self::NONE];
 
         if (!$this->arePlayersOnline()) {
@@ -473,9 +555,13 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @param bool $endPrematurely
+     * @param bool $disablePlugin
+     * @return void
+     */
     private function endDuel(bool $endPrematurely = false, bool $disablePlugin = false): void
     {
-
         $this->clearBlocks();
 
         $messageList = $this->getFinalMessage($endPrematurely);
@@ -521,10 +607,12 @@ class DuelGroup
         PracticeCore::getDuelHandler()->endDuel($this);
     }
 
+    /**
+     * @return void
+     */
     private function clearBlocks(): void
     {
-
-        $level = $this->getArena()->getLevel();
+        $level = $this->getArena()->getWorld();
 
         $size = count($this->blocks);
 
@@ -533,8 +621,8 @@ class DuelGroup
         for ($i = 0; $i < $size; $i++) {
             $block = $this->blocks[$i];
             if ($block instanceof Position) {
-                $id = ($spleef === true) ? Block::SNOW_BLOCK : Block::AIR;
-                $level->setBlockIdAt($block->x, $block->y, $block->z, $id);
+                $id = ($spleef === true) ? BlockLegacyIds::SNOW_BLOCK : BlockLegacyIds::AIR;
+                $level->setBlockAt($block->x, $block->y, $block->z, $id);
             }
         }
 
@@ -544,19 +632,25 @@ class DuelGroup
     /**
      * @return DuelArena|null
      */
-    public function getArena()
+    public function getArena(): ?DuelArena
     {
         return $this->arena;
     }
 
-    public function isSpleef(): bool
+    /**
+     * @return bool
+     */
+    #[Pure] public function isSpleef(): bool
     {
         return PracticeUtil::equals_string($this->queue, "Spleef", "spleef", "SPLEEF");
     }
 
+    /**
+     * @param bool $endPrematurely
+     * @return string[]
+     */
     private function getFinalMessage(bool $endPrematurely): array
     {
-
         $resultMsg = $this->getResultMessage();
 
         $result = ['*', $resultMsg, '*'];
@@ -590,6 +684,9 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @return string
+     */
     private function getResultMessage(): string
     {
         $result = PracticeUtil::str_replace(PracticeUtil::getMessage("duels.end.result-msg"), ["%winner%" => $this->winnerName, "%loser%" => $this->loserName]);
@@ -603,6 +700,10 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @param $player
+     * @return bool
+     */
     public function isOpponent($player): bool
     {
         $result = false;
@@ -614,6 +715,13 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @param int $wElo
+     * @param int $lElo
+     * @param int $winner
+     * @param int $loser
+     * @return string
+     */
     private function getEloChanges(int $wElo, int $lElo, int $winner, int $loser): string
     {
         $result = PracticeUtil::getMessage("duels.end.elo-changes");
@@ -621,15 +729,14 @@ class DuelGroup
         return PracticeUtil::str_replace($result, ["%wElo%" => "$winner", "%lElo%" => "$loser"]);
     }
 
+    /**
+     * @return string
+     */
     private function getSpectatorMessage(): string
     {
-
-        $result = "";
-
         $msg = PracticeUtil::getMessage("duels.spectator.end-msg");
 
         $replaced = "";
-
         $size = count($this->spectators);
 
         if ($size > 0) {
@@ -665,18 +772,22 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @return bool
+     */
     public function isLoadingDuel(): bool
     {
         return $this->started === false and $this->ended === false;
     }
 
+    /**
+     * @return void
+     */
     private function start()
     {
-
         $this->started = true;
 
         if ($this->arePlayersOnline()) {
-
             $p = $this->getPlayer();
             $o = $this->getOpponent();
 
@@ -685,7 +796,10 @@ class DuelGroup
         }
     }
 
-    public function getDuration(): int
+    /**
+     * @return int
+     */
+    #[Pure] public function getDuration(): int
     {
         $duration = $this->currentTick - $this->countdownTick;
         if ($this->didDuelEnd()) {
@@ -695,9 +809,11 @@ class DuelGroup
         return $duration;
     }
 
+    /**
+     * @return void
+     */
     private function updateScoreboards(): void
     {
-
         $duration = $this->getDurationString();
 
         $d = ScoreboardUtil::getNames()['duration'];
@@ -722,6 +838,9 @@ class DuelGroup
         }
     }
 
+    /**
+     * @return string
+     */
     public function getDurationString(): string
     {
 
@@ -755,11 +874,19 @@ class DuelGroup
         return $s;
     }
 
-    private function isSumo(): bool
+    /**
+     * @return bool
+     */
+    #[Pure] private function isSumo(): bool
     {
         return PracticeUtil::equals_string($this->queue, 'Sumo', 'sumo', 'SUMO', 'sumopvp');
     }
 
+    /**
+     * @param PracticePlayer $player
+     * @param float $below
+     * @return bool
+     */
     private function isPlayerBelowCenter(PracticePlayer $player, float $below): bool
     {
         $pos = $player->getPlayer()->getPosition();
@@ -768,9 +895,13 @@ class DuelGroup
         return $y + $below <= $centerY;
     }
 
+    /**
+     * @param string $winner
+     * @param string $loser
+     * @return void
+     */
     public function setResults(string $winner = self::NONE, string $loser = self::NONE)
     {
-
         $this->winnerName = $winner;
         $this->loserName = $loser;
 
@@ -792,9 +923,12 @@ class DuelGroup
         $this->setDuelEnded();
     }
 
+    /**
+     * @param $player
+     * @return void
+     */
     public function addHitFrom($player)
     {
-
         if ($this->isPlayer($player)) {
 
             $hit = new DuelPlayerHit($this->opponentName, $this->currentTick);
@@ -831,6 +965,10 @@ class DuelGroup
         }
     }
 
+    /**
+     * @param $player
+     * @return bool
+     */
     public function isPlayer($player): bool
     {
         $result = false;
@@ -844,38 +982,57 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @return bool
+     */
     public function isInDuelCombat(): bool
     {
         return $this->fightingTick > 0;
     }
 
+    /**
+     * @return void
+     */
     public function setInDuelCombat(): void
     {
         $this->fightingTick = PracticeUtil::secondsToTicks(3);
     }
 
+    /**
+     * @return int
+     */
     public function getFightingTick(): int
     {
         return $this->fightingTick;
     }
 
+    /**
+     * @return string
+     */
     public function getArenaName(): string
     {
         return $this->arenaName;
     }
 
+    /**
+     * @param Block $against
+     * @return bool
+     */
     public function canPlaceBlock(Block $against): bool
     {
         $count = $this->countPlaced($against);
         return $count < 5;
     }
 
+    /**
+     * @param Block $against
+     * @return int
+     */
     private function countPlaced(Block $against): int
     {
-
         $count = 0;
 
-        $blAgainst = $against->asPosition();
+        $blAgainst = $against->getPosition();
 
         if (!$this->isSpleef() and $this->isPlacedBlock($against)) {
             $level = $this->arena->getLevel();
@@ -887,44 +1044,58 @@ class DuelGroup
         return $count;
     }
 
-    public function isPlacedBlock($block)
+    /**
+     * @param $block
+     * @return bool
+     */
+    public function isPlacedBlock($block): bool
     {
         return $this->indexOfBlock($block) !== -1;
     }
 
+    /**
+     * @param $block
+     * @return int
+     */
     private function indexOfBlock($block): int
     {
-
         $index = -1;
 
         if ($block instanceof Block) {
-            $vec = $block->asPosition();
-            if (is_null($vec->level)) $vec->level = $this->getArena()->getLevel();
+            $vec = $block->getPosition();
+            if (is_null($vec->world)) $vec->world = $this->getArena()->getWorld();
             $index = array_search($vec, $this->blocks);
             if (is_bool($index) and $index === false) {
                 $index = -1;
             }
         }
 
-        //echo ("$index is an index!\n");
-
         return $index;
     }
 
-    public function canBreak(): bool
+    /**
+     * @return bool
+     */
+    #[Pure] public function canBreak(): bool
     {
         $result = $this->canBuild();
         return ($this->isSpleef()) ? true : $result;
     }
 
-    public function canBuild(): bool
+    /**
+     * @return bool
+     */
+    #[Pure] public function canBuild(): bool
     {
         return $this->getArena()->canBuild();
     }
 
+    /**
+     * @param Block $position
+     * @return bool
+     */
     public function removeBlock(Block $position): bool
     {
-
         $result = false;
 
         if ($this->isSpleef() and $this->isSpleefBlock($position)) {
@@ -942,23 +1113,33 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @param Block $position
+     * @return bool
+     */
     private function isSpleefBlock(Block $position): bool
     {
         $id = $position->getId();
-        return $id === Block::SNOW_BLOCK or $id === Block::SNOW_LAYER;
+        return $id === BlockLegacyIds::SNOW_BLOCK or $id === BlockLegacyIds::SNOW_LAYER;
     }
 
+    /**
+     * @param Block $position
+     * @return void
+     */
     public function addBlock(Block $position): void
     {
-        $pos = $position->asPosition();
+        $pos = $position->getPosition();
         $this->blocks[] = $pos;
     }
 
+    /**
+     * @param $spectator
+     * @return void
+     */
     public function addSpectator($spectator): void
     {
-
         if (PracticeCore::getPlayerHandler()->isPlayerOnline($spectator)) {
-
             $p = PracticeCore::getPlayerHandler()->getPlayer($spectator);
 
             $pl = $p->getPlayer();
@@ -981,6 +1162,10 @@ class DuelGroup
         }
     }
 
+    /**
+     * @param $object
+     * @return bool
+     */
     public function equals($object): bool
     {
         $result = false;
@@ -991,14 +1176,19 @@ class DuelGroup
         return $result;
     }
 
+    /**
+     * @return string
+     */
     public function getQueue(): string
     {
         return $this->queue;
     }
 
+    /**
+     * @return string
+     */
     public function queueToString(): string
     {
-
         $str = PracticeUtil::getName('scoreboard.duels.kit');
 
         return PracticeUtil::str_replace($str, ['%kit%' => $this->queue]);
