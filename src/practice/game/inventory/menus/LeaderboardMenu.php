@@ -1,33 +1,26 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-05-19
- * Time: 13:08
- */
-
-declare(strict_types=1);
 
 namespace practice\game\inventory\menus;
 
-use pocketmine\inventory\transaction\action\SlotChangeAction;
-use practice\game\inventory\menus\inventories\SingleChestInv;
+use muqsit\invmenu\InvMenu;
+use muqsit\invmenu\type\InvMenuTypeIds;
+use pocketmine\player\Player;
 use practice\game\items\PracticeItem;
-use practice\player\PracticePlayer;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
-class LeaderboardMenu extends BaseMenu
+class LeaderboardMenu
 {
-
-    public function __construct()
+    /**
+     * @param Player $player
+     * @return void
+     */
+    public static function showMenu(Player $player)
     {
+        $menu = InvMenu::create(InvMenuTypeIds::TYPE_CHEST);
 
-        parent::__construct(new SingleChestInv($this));
-
-        $this->setName(PracticeUtil::getName('title-leaderboard-inv'));
-
-        $this->setEdit(false);
+        $menu->setName(PracticeUtil::getName('title-leaderboard-inv'));
+        $menu->setListener(InvMenu::readonly());
 
         $items = PracticeCore::getItemHandler()->getLeaderboardItems();
 
@@ -35,26 +28,10 @@ class LeaderboardMenu extends BaseMenu
             if ($item instanceof PracticeItem) {
                 $slot = $item->getSlot();
                 $i = $item->getItem();
-                $this->getInventory()->setItem($slot, $i);
+                $menu->getInventory()->setItem($slot, $i);
             }
         }
-    }
 
-    public function onItemMoved(PracticePlayer $p, SlotChangeAction $action): void
-    {
-    }
-
-    public function onInventoryClosed(Player $player): void
-    {
-        PracticeCore::getPlayerHandler()->setOpenInventoryID($player);
-    }
-
-    public function sendTo($player): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $pl = $p->getPlayer();
-            $this->send($pl);
-        }
+        $menu->send($player);
     }
 }

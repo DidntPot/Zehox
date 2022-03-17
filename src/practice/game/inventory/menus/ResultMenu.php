@@ -1,37 +1,29 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-05-01
- * Time: 08:44
- */
-
-declare(strict_types=1);
 
 namespace practice\game\inventory\menus;
 
-
-use pocketmine\inventory\transaction\action\SlotChangeAction;
+use muqsit\invmenu\InvMenu;
+use muqsit\invmenu\type\InvMenuTypeIds;
+use pocketmine\player\Player;
 use practice\duels\misc\DuelInvInfo;
-use practice\game\inventory\menus\inventories\DoubleChestInv;
-use practice\player\PracticePlayer;
-use practice\PracticeCore;
 use practice\PracticeUtil;
 
-class ResultMenu extends BaseMenu
+class ResultMenu
 {
-
-    public function __construct(DuelInvInfo $info)
+    /**
+     * @param Player $player
+     * @param DuelInvInfo $info
+     * @return void
+     */
+    public static function showMenu(Player $player, DuelInvInfo $info)
     {
-
-        parent::__construct(new DoubleChestInv($this));
+        $menu = InvMenu::create(InvMenuTypeIds::TYPE_DOUBLE_CHEST);
 
         $name = PracticeUtil::getName('duel-result-inventory');
         $name = PracticeUtil::str_replace($name, ['%player%' => $info->getPlayerName()]);
 
-        $this->setEdit(false);
-
-        $this->setName($name);
+        $menu->setName($name);
+        $menu->setListener(InvMenu::readonly());
 
         $allItems = [];
 
@@ -47,8 +39,6 @@ class ResultMenu extends BaseMenu
 
             $currentRow = $maxRows - $row;
             $v = ($currentRow + 1) * 9;
-
-            $val = -1;
 
             if ($row === 0) {
                 $v = $v - 9;
@@ -85,25 +75,9 @@ class ResultMenu extends BaseMenu
         foreach ($keys as $index) {
             $index = intval($index);
             $item = $allItems[$index];
-            $this->getInventory()->setItem($index, $item);
+            $menu->getInventory()->setItem($index, $item);
         }
-    }
 
-    public function onItemMoved(PracticePlayer $p, SlotChangeAction $action): void
-    {
-    }
-
-    public function onInventoryClosed(Player $player): void
-    {
-        PracticeCore::getPlayerHandler()->setOpenInventoryID($player);
-    }
-
-    public function sendTo($player): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $pl = $p->getPlayer();
-            $this->send($pl);
-        }
+        $menu->send($player);
     }
 }

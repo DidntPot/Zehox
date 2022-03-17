@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace practice\player;
 
 use JetBrains\PhpStorm\ArrayShape;
-use JetBrains\PhpStorm\Pure;
 use pocketmine\entity\Entity;
 use pocketmine\player\Player;
 use pocketmine\Server;
@@ -26,8 +25,6 @@ class PlayerHandler
     /** @var string */
     private string $playerFolderPath;
     /** @var array */
-    private array $closedInventoryIDs;
-    /** @var array */
     private array $leaderboards;
     /** @var Server */
     private Server $server;
@@ -39,7 +36,6 @@ class PlayerHandler
     {
         $this->players = [];
         $this->pendingDeviceData = [];
-        $this->closedInventoryIDs = [];
         $this->leaderboards = [];
         $this->initFiles($core);
         $this->server = $core->getServer();
@@ -277,70 +273,6 @@ class PlayerHandler
     {
         $this->leaderboards = $leaderboards;
 
-    }
-
-    /**
-     * @param PracticePlayer $player
-     * @return int
-     */
-    public function getOpenChestID(PracticePlayer $player): int
-    {
-        $result = 1;
-
-        while (in_array($result, $this->closedInventoryIDs) or !is_null($player->getWindow($result)))
-            $result++;
-
-        return $result;
-    }
-
-    /**
-     * @param int $id
-     * @param Player $player
-     * @return bool
-     */
-    public function setClosedInventoryID(int $id, Player $player): bool
-    {
-        $result = false;
-
-        $index = array_search($id, $this->closedInventoryIDs);
-
-        if (is_bool($index) and $index === false) $index = null;
-
-        if (is_null($index)) {
-            $this->closedInventoryIDs[$player->getName()] = $id;
-            $result = true;
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param Player $player
-     * @return void
-     */
-    public function setOpenInventoryID(Player $player): void
-    {
-        $name = $player->getName();
-
-        $id = $this->getClosedChestID($player);
-
-        if ($id !== -1) unset($this->closedInventoryIDs[$name]);
-    }
-
-    /**
-     * @param Player $player
-     * @return int
-     */
-    #[Pure] private function getClosedChestID(Player $player): int
-    {
-        $name = $player->getName();
-
-        $id = -1;
-
-        if (isset($this->closedInventoryIDs[$name]))
-            $id = intval($this->closedInventoryIDs[$name]);
-
-        return $id;
     }
 
     /**

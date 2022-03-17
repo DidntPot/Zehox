@@ -52,7 +52,6 @@ use practice\anticheat\AntiCheatUtil;
 use practice\arenas\PracticeArena;
 use practice\game\FormUtil;
 use practice\game\inventory\InventoryUtil;
-use practice\game\inventory\menus\inventories\PracBaseInv;
 use practice\game\items\PracticeItem;
 use practice\player\permissions\PermissionsHandler;
 use practice\player\PlayerSpawnTask;
@@ -272,7 +271,7 @@ class PracticeListener implements Listener
             else {
                 if ($playerHandler->isPlayerOnline($name)) {
                     $player = $playerHandler->getPlayer($name);
-                    $lvl = $player->getPlayer()->getLevel();
+                    $lvl = $player->getPlayer()->getWorld();
                     if (PracticeUtil::areWorldEqual($lvl, PracticeUtil::getDefaultWorld())) {
                         if ($cause === EntityDamageEvent::CAUSE_VOID) {
                             if ($duelHandler->isASpectator($name)) {
@@ -1074,25 +1073,6 @@ class PracticeListener implements Listener
     }
 
     /**
-     * @param InventoryCloseEvent $event
-     * @return void
-     */
-    public function onInventoryClosed(InventoryCloseEvent $event): void
-    {
-        $p = $event->getPlayer();
-
-        $playerHandler = PracticeCore::getPlayerHandler();
-
-        if ($playerHandler->isPlayerOnline($p)) {
-            $inv = $event->getInventory();
-            if ($inv instanceof PracBaseInv) {
-                $menu = $inv->getMenu();
-                $menu->onInventoryClosed($p);
-            }
-        }
-    }
-
-    /**
      * @param InventoryTransactionEvent $event
      * @return void
      */
@@ -1107,34 +1087,16 @@ class PracticeListener implements Listener
 
         if ($playerHandler->isPlayerOnline($p)) {
             $player = $playerHandler->getPlayer($p);
-            $testInv = false;
 
             if (PracticeUtil::areWorldEqual($lvl, PracticeUtil::getDefaultWorld())) {
                 if (PracticeUtil::isLobbyProtectionEnabled()) {
                     $cancel = !$player->isInDuel() and !$player->isInArena();
-                    $testInv = true;
 
                     if ($cancel === true and PracticeUtil::testPermission($p, PermissionsHandler::PERMISSION_PLACE_BREAK, false)) $cancel = !$playerHandler->canPlaceNBreak($p->getName());
                 }
 
-            } else $testInv = true;
-
-            $testInv = ($cancel === false) ? true : $testInv;
-
-            if ($testInv === true) {
-                $actions = $transaction->getActions();
-                foreach ($actions as $action) {
-                    if ($action instanceof SlotChangeAction) {
-                        $inventory = $action->getInventory();
-                        if ($inventory instanceof PracBaseInv) {
-                            $menu = $inventory->getMenu();
-                            $menu->onItemMoved($player, $action);
-                            if (!$menu->canEdit()) $cancel = true;
-                        }
-                    }
-                }
             }
-        } else $cancel = true;
+        }
 
         if ($cancel === true) $event->cancel();
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace practice;
 
 use JetBrains\PhpStorm\Pure;
+use muqsit\invmenu\InvMenuHandler;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\data\bedrock\EntityLegacyIds;
@@ -207,6 +208,13 @@ class PracticeCore extends PluginBase
      */
     public function onEnable(): void
     {
+        if(!class_exists(InvMenuHandler::class)){
+            $this->getServer()->getLogger()->info("InvMenu not found! Disabling the plugin.");
+            $this->getServer()->shutdown();
+        }
+
+        if(!InvMenuHandler::isRegistered()) InvMenuHandler::register($this);
+
         $this->loadWorlds();
 
         $this->registerEntities();

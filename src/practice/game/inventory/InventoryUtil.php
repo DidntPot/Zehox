@@ -23,8 +23,7 @@ class InventoryUtil
     {
         if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
             $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $inventory = new FFAMenu();
-            $inventory->sendTo($p->getPlayer());
+            FFAMenu::showMenu($p->getPlayer());
         }
     }
 
@@ -37,8 +36,7 @@ class InventoryUtil
     {
         if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
             $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $inventory = new MatchMenu($ranked);
-            $inventory->sendTo($p->getPlayer());
+            MatchMenu::showMenu($p->getPlayer(), $ranked);
         }
     }
 
@@ -50,8 +48,7 @@ class InventoryUtil
     {
         if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
             $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $inventory = new DuelMenu();
-            $inventory->sendTo($p->getPlayer());
+            DuelMenu::showMenu($p->getPlayer());
         }
     }
 
@@ -79,10 +76,7 @@ class InventoryUtil
                 $lastDuelInfo = $p->getInfoOfLastDuel()[$res];
 
                 if ($lastDuelInfo instanceof DuelInvInfo) {
-
-                    $inventory = new ResultMenu($lastDuelInfo);
-
-                    $inventory->sendTo($player);
+                    ResultMenu::showMenu($player, $lastDuelInfo);
                 }
             }
         }
@@ -95,12 +89,8 @@ class InventoryUtil
     public static function sendLeaderboardInv($player): void
     {
         if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-
             $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-
-            $inventory = new LeaderboardMenu();
-
-            $inventory->sendTo($p->getPlayer());
+            LeaderboardMenu::showMenu($p->getPlayer());
         }
     }
 }
