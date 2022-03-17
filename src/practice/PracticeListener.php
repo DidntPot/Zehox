@@ -15,7 +15,6 @@ use pocketmine\event\block\BlockSpreadEvent;
 use pocketmine\event\entity\EntityDamageByChildEntityEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerBucketEmptyEvent;
@@ -28,11 +27,12 @@ use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerLoginEvent;
+use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\plugin\PluginDisableEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
-use pocketmine\inventory\transaction\action\SlotChangeAction;
+use pocketmine\event\server\DataPacketSendEvent;
 use pocketmine\item\Bucket;
 use pocketmine\item\EnderPearl;
 use pocketmine\item\FlintSteel;
@@ -64,12 +64,25 @@ class PracticeListener implements Listener
     /** @var PracticeCore */
     private PracticeCore $core;
 
+    /** @var array */
+    private static array $clientInfo = [];
+
     /**
      * @param PracticeCore $c
      */
     public function __construct(PracticeCore $c)
     {
         $this->core = $c;
+    }
+
+    /**
+     * @param PlayerPreLoginEvent $event
+     * @return void
+     */
+    public function onPreLogin(PlayerPreLoginEvent $event): void
+    {
+        $pInfo = $event->getPlayerInfo();
+        unset(self::$clientInfo[$pInfo->getUsername()]);
     }
 
     /**
@@ -83,6 +96,17 @@ class PracticeListener implements Listener
         $playerHandler = PracticeCore::getPlayerHandler();
 
         if (!is_null($p)) {
+            $data = self::$clientInfo;
+
+            $playerHandler->putPendingPInfo(
+                $event->getPlayer()->getName(),
+                (isset($data['DeviceOS'])) ? intval($data['DeviceOS']) : -1,
+                (isset($data['CurrentInputMode'])) ? intval($data['CurrentInputMode']) : -1,
+                (isset($data['ClientRandomId'])) ? intval($data['ClientRandomId']) : -1,
+                (isset($data['DeviceId'])) ? strval($data['DeviceId']) : '',
+                (isset($data['DeviceModel'])) ? strval($data['DeviceModel']) : ''
+            );
+
             $pl = $playerHandler->addPlayer($p);
             $nameTag = PracticeUtil::getNameTagFormat($p);
             $p->setNameTag($nameTag);
@@ -1037,6 +1061,26 @@ class PracticeListener implements Listener
     }
 
     /**
+     * @param DataPacketSendEvent $event
+     * @return void
+     */
+    public function onPacketSend(DataPacketSendEvent $event): void
+    {
+        $packets = $event->getPackets();
+        foreach($packets as $packet){
+            if ($packet->pid() == LevelSoundEventPacket::NETWORK_ID) {
+                switch ($packet->sound) {
+                    case LevelSoundEvent::ATTACK:
+                    case LevelSoundEvent::ATTACK_NODAMAGE:
+                    case LevelSoundEvent::ATTACK_STRONG:
+                        $event->cancel();
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
      * @param DataPacketReceiveEvent $event
      * @return void
      */
@@ -1046,19 +1090,6 @@ class PracticeListener implements Listener
         $player = $event->getOrigin()->getPlayer();
 
         $playerHandler = PracticeCore::getPlayerHandler();
-
-        // TODO: Fucking finish this:
-        /*if ($pkt instanceof LoginPacket) {
-            $clientData = $pkt->clientData;
-
-            $device = (isset($clientData['DeviceOS'])) ? intval($clientData['DeviceOS']) : -1;
-            $input = (isset($clientData['CurrentInputMode'])) ? intval($clientData['CurrentInputMode']) : -1;
-            $cid = (isset($clientData['ClientRandomId'])) ? intval($clientData['ClientRandomId']) : -1;
-            $deviceID = (isset($clientData['DeviceId'])) ? strval($clientData['DeviceId']) : '';
-            $deviceModel = (isset($clientData['DeviceModel'])) ? strval($clientData['DeviceModel']) : '';
-
-            if ($player !== null) $playerHandler->putPendingPInfo($pkt->getName(), $device, $input, $cid, $deviceID, $deviceModel);
-        }*/
 
         if ($pkt instanceof LevelSoundEventPacket) {
             if ($pkt->sound == LevelSoundEvent::ATTACK_NODAMAGE) {

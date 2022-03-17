@@ -21,7 +21,7 @@ class PlayerHandler
     /* @var PracticePlayer[] */
     private array $players;
     /** @var array */
-    private array $pendingDeviceData;
+    public array $pendingDeviceData;
     /** @var string */
     private string $playerFolderPath;
     /** @var array */
