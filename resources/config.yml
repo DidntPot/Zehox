@@ -1,0 +1,13 @@
+lobby-protection: true
+lobby-level: "world"
+
+enable-tap-to-pearl: true
+enable-tap-to-pot: true
+enable-tap-to-rod: true
+
+enable-enderpearl-cooldown: true
+
+enable-hub-formwindows: true
+enable-ranks: true
+enable-chat-filter: false
+enable-mysql: false

@@ -1,0 +1,31 @@
+# Chat format for players with a rank. -> must have %formatted-ranks%, %player-name%, and %msg%
+chat-format: "[%formatted-ranks%] %player-name% -> %msg%"
+
+# The format for a player name tag. -> can have %formatted-ranks%, %player-name%, and %hp%
+nametag-format: "[%formatted-ranks%] %player-name% [%hp%]"
+
+format:
+  guest:
+    rank: "Guest"
+    p-name: "%player%"
+  builder:
+    rank: "Builder"
+    p-name: "%player%"
+  youtube:
+    rank: "YouTube"
+    p-name: "%player%"
+  famous:
+    rank: "Famous"
+    p-name: "%player%"
+  admin:
+    rank: "Admin"
+    p-name: "%player%"
+  mod:
+    rank: "Moderator"
+    p-name: "%player%"
+  dev:
+    rank: "Dev"
+    p-name: "%player%"
+  owner:
+    rank: "Owner"
+    p-name: "%player%"

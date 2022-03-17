@@ -1,0 +1,6 @@
+host: 'localhost'
+
+username: 'root'
+password: 'password'
+database-name: 'practice'
+port: 3306
