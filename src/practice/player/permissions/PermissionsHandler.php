@@ -68,7 +68,6 @@ class PermissionsHandler
      */
     private function initConfig(): void
     {
-
         $array = [
             'content-creators' => [],
             'builders' => [],
@@ -83,11 +82,8 @@ class PermissionsHandler
 
         $ownerPerms = [];
 
-        // TODO: Hi, I ain't updating this. Sorry lolz.
         foreach ($perms as $perm) {
-            $defaultValue = $perm->getDefault();
-            if ($defaultValue === Permission::DEFAULT_OP)
-                $ownerPerms[] = $perm->getName();
+            $ownerPerms[] = $perm->getName();
         }
 
         $ownerPerms[] = self::PERMISSION_PLACE_BREAK;
