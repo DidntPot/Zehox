@@ -209,7 +209,7 @@ class PracticeCore extends PluginBase
     public function onEnable(): void
     {
         if(!class_exists(InvMenuHandler::class)){
-            $this->getServer()->getLogger()->info("InvMenu not found! Disabling the plugin.");
+            $this->getServer()->getLogger()->info("InvMenu not found!");
             $this->getServer()->shutdown();
         }
 
