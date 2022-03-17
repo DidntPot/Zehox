@@ -793,7 +793,7 @@ class PracticePlayer
         if ($this->isOnline()) {
             $player = $this->getPlayer();
 
-            if(!$player instanceof Player) return;
+            if (!$player instanceof Player) return;
 
             if ($player !== null and !$this->isFishing()) {
                 $location = $player->getLocation();

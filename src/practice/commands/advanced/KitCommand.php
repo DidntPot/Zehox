@@ -5,7 +5,6 @@ namespace practice\commands\advanced;
 use JsonException;
 use pocketmine\command\CommandSender;
 use pocketmine\entity\effect\EffectInstance;
-use pocketmine\entity\effect\EffectManager;
 use pocketmine\entity\effect\StringToEffectParser;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;

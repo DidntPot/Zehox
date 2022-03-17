@@ -78,7 +78,8 @@ class AsyncUpdateLeaderboards extends AsyncTask
                 $place = $size - $i;
                 $name = strval($playerNames[$i]);
                 $elo = intval($sortedElo[$name]);
-                $string = str_replace('%spot%', "" . $place + 1, str_replace('%player%', $name, str_replace('%elo%', "$elo", $format)));$result[] = $string;
+                $string = str_replace('%spot%', "" . $place + 1, str_replace('%player%', $name, str_replace('%elo%', "$elo", $format)));
+                $result[] = $string;
             }
 
             $size = count($result);

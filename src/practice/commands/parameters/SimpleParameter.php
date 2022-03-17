@@ -61,16 +61,6 @@ class SimpleParameter implements Parameter
      * @param bool $b
      * @return SimpleParameter
      */
-    public function setOptional(bool $b): SimpleParameter
-    {
-        $this->optional = $b;
-        return $this;
-    }
-
-    /**
-     * @param bool $b
-     * @return SimpleParameter
-     */
     public function setExactValues(bool $b): SimpleParameter
     {
         $this->setHasExact = $b;
@@ -148,6 +138,16 @@ class SimpleParameter implements Parameter
     public function isOptional(): bool
     {
         return $this->optional;
+    }
+
+    /**
+     * @param bool $b
+     * @return SimpleParameter
+     */
+    public function setOptional(bool $b): SimpleParameter
+    {
+        $this->optional = $b;
+        return $this;
     }
 
     /**

@@ -60,11 +60,15 @@ class DisguiseCommand extends BaseCommand
      * @param CommandSender $sender
      * @return void
      */
-    private function turnOnDisguise(CommandSender $sender): void{}
+    private function turnOnDisguise(CommandSender $sender): void
+    {
+    }
 
     /**
      * @param CommandSender $sender
      * @return void
      */
-    private function turnOffDisguise(CommandSender $sender): void{}
+    private function turnOffDisguise(CommandSender $sender): void
+    {
+    }
 }

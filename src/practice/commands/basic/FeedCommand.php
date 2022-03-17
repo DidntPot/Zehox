@@ -7,7 +7,6 @@ namespace practice\commands\basic;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\utils\CommandException;
-use pocketmine\entity\Attribute;
 use pocketmine\player\Player;
 use practice\PracticeCore;
 use practice\PracticeUtil;

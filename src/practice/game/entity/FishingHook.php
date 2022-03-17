@@ -91,7 +91,7 @@ class FishingHook extends Projectile
             $itemInHand = $owner->getInventory()->getItemInHand();
             if ($owner->getPosition()->distance($this->getPosition()) > 35 || $itemInHand->getId() !== ItemIds::FISHING_ROD || $this->attachedEntity !== null) {
                 $this->close();
-                if($owner instanceof PracticePlayer){
+                if ($owner instanceof PracticePlayer) {
                     $owner->stopFishing();
                 }
             }

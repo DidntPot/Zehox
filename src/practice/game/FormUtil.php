@@ -1,15 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jkorn2324
- * Date: 2019-04-29
- * Time: 16:22
- */
 
 declare(strict_types=1);
 
 namespace practice\game;
-
 
 use jojoe77777\FormAPI\CustomForm;
 use jojoe77777\FormAPI\SimpleForm;
@@ -25,7 +18,10 @@ use practice\PracticeUtil;
 
 class FormUtil
 {
-
+    /**
+     * @param bool $ranked
+     * @return SimpleForm
+     */
     public static function getMatchForm(bool $ranked = false): SimpleForm
     {
 
@@ -64,7 +60,7 @@ class FormUtil
 
                     if (PracticeCore::getKitHandler()->isDuelKit($queue)) PracticeCore::getDuelHandler()->addPlayerToQueue($p->getPlayerName(), $queue, boolval($formData['ranked']));
 
-                } else return;
+                }
             }
 
         });
@@ -98,6 +94,9 @@ class FormUtil
         return $form;
     }
 
+    /**
+     * @return SimpleForm
+     */
     public static function getDuelsForm(): SimpleForm
     {
 
@@ -147,7 +146,7 @@ class FormUtil
                         else $ivsiHandler->cancelRequest($request);
 
                     }
-                } else return;
+                }
             }
 
         });
@@ -167,6 +166,9 @@ class FormUtil
     }
 
 
+    /**
+     * @return SimpleForm
+     */
     public static function getFFAForm(): SimpleForm
     {
 
@@ -233,6 +235,9 @@ class FormUtil
         return $form;
     }
 
+    /**
+     * @return CustomForm
+     */
     public static function getReportBugForm(): CustomForm
     {
 
@@ -272,6 +277,10 @@ class FormUtil
         return $form;
     }
 
+    /**
+     * @param string $excludedName
+     * @return CustomForm
+     */
     public static function getReportHackForm(string $excludedName = ''): CustomForm
     {
 
@@ -329,9 +338,12 @@ class FormUtil
         return $form;
     }
 
+    /**
+     * @param string $excludedName
+     * @return CustomForm
+     */
     public static function getReportStaffForm(string $excludedName = ''): CustomForm
     {
-
         $title = 'Report a staff member!';
 
         $reportedStaffContent = 'Select the staff member to report!';
@@ -385,6 +397,11 @@ class FormUtil
         return $form;
     }
 
+    /**
+     * @param int $timeFrame
+     * @param int $reportType
+     * @return CustomForm
+     */
     public static function getReportsForm(int $timeFrame = ReportInfo::ALL_TIME, int $reportType = ReportInfo::ALL_REPORTS): CustomForm
     {
 
@@ -454,12 +471,16 @@ class FormUtil
         return $form;
     }
 
+    /**
+     * @param string $player
+     * @return CustomForm
+     */
     public static function getStatsForm(string $player): CustomForm
     {
 
         $stats = PracticeCore::getPlayerHandler()->getStats($player);
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+        $form = new CustomForm(function (Player $event) {
 
             if (PracticeCore::getPlayerHandler()->isPlayer($event))
                 PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
@@ -477,6 +498,11 @@ class FormUtil
         return $form;
     }
 
+    /**
+     * @param string $player
+     * @param bool $op
+     * @return CustomForm
+     */
     public static function getSettingsForm(string $player, bool $op = false): CustomForm
     {
 
@@ -497,12 +523,10 @@ class FormUtil
 
                     if ($resultSB === true) {
 
-                        if (!PracticeCore::getPlayerHandler()->isScoreboardEnabled($event->getName())) ;
                         $p->showScoreboard();
 
                     } else {
 
-                        if (PracticeCore::getPlayerHandler()->isScoreboardEnabled($event->getName())) ;
                         $p->hideScoreboard();
                     }
 
@@ -549,6 +573,9 @@ class FormUtil
         return $form;
     }
 
+    /**
+     * @return CustomForm
+     */
     public static function createPartyForm(): CustomForm
     {
 
@@ -574,35 +601,36 @@ class FormUtil
         return $form;
     }
 
-    //TODO
+    /**
+     * @return CustomForm
+     */
     public static function getPartySettingsForm(): CustomForm
     {
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+        return new CustomForm(function (Player $event, $data = null) {
 
         });
-
-        return $form;
     }
 
+    /**
+     * @param string $player
+     * @param bool $permBan
+     * @return CustomForm
+     */
     public static function getBanForm(string $player, bool $permBan): CustomForm
     {
 
         $form = new CustomForm(function (Player $event, $data = null) {
 
-            $formData = [];
             $playerHandler = PracticeCore::getPlayerHandler();
             if ($playerHandler->isPlayerOnline($event))
-                $formData = $playerHandler->getPlayer($event)->removeForm();
 
-            //TODO
             if (!is_null($data) and is_array($data)) {
                 var_dump($data);
             }
         });
 
 
-        //TODO ADD TO NAMES.YML
         $form->setTitle('Ban Player: ' . $player);
 
         $form->addInput('Reason for ban: ');

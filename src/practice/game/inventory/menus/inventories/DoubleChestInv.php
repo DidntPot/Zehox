@@ -5,7 +5,6 @@ namespace practice\game\inventory\menus\inventories;
 use pocketmine\block\Block;
 use pocketmine\block\tile\Tile;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\protocol\types\inventory\WindowTypes;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\tile\Tile;
 use practice\game\inventory\menus\BaseMenu;

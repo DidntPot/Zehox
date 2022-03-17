@@ -425,5 +425,7 @@ class BaseCommand extends Command
      *
      * @return void
      */
-    public function execute(CommandSender $sender, string $commandLabel, array $args): void{}
+    public function execute(CommandSender $sender, string $commandLabel, array $args): void
+    {
+    }
 }

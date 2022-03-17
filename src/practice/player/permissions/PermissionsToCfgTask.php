@@ -10,7 +10,9 @@ use practice\PracticeCore;
 
 class PermissionsToCfgTask extends Task
 {
-    public function __construct(){}
+    public function __construct()
+    {
+    }
 
     /**
      * @return void
