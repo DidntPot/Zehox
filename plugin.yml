@@ -3,8 +3,11 @@ version: "2.0.0"
 
 api:
   - "4.0.0"
+authors: 
+  - "jkorn2324"
+  - "DidntPot
 
-main: "practice\PracticeCore"
+main: practice\PracticeCore
 
 permissions:
   practice.permission.kit:
