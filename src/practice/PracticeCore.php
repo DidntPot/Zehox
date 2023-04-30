@@ -56,405 +56,365 @@ use practice\player\PlayerHandler;
 use practice\ranks\RankHandler;
 use UnexpectedValueException;
 
-class PracticeCore extends PluginBase
-{
-    /** @var PracticeCore */
-    private static PracticeCore $instance;
+class PracticeCore extends PluginBase{
+	/** @var PracticeCore */
+	private static PracticeCore $instance;
 
-    /** @var PlayerHandler */
-    private static PlayerHandler $playerHandler;
-    /** @var ChatHandler */
-    private static ChatHandler $chatHandler;
-    /** @var RankHandler */
-    private static RankHandler $rankHandler;
-    /** @var ItemHandler */
-    private static ItemHandler $itemHandler;
-    /** @var KitHandler */
-    private static KitHandler $kitHandler;
-    /** @var ArenaHandler */
-    private static ArenaHandler $arenaHandler;
-    /** @var DuelHandler */
-    private static DuelHandler $duelHandler;
-    /** @var IvsIHandler */
-    private static IvsIHandler $ivsiHandler;
-    /** @var ReportHandler */
-    private static ReportHandler $reportHandler;
-    /* @var PermissionsHandler */
-    private static PermissionsHandler $permissionsHandler;
-    /** @var PartyManager */
-    private static PartyManager $partyManager;
-    /** @var IPHandler */
-    private static IPHandler $ipHandler;
-    /** @var MysqlManager */
-    private static MysqlManager $mysqlManager;
+	/** @var PlayerHandler */
+	private static PlayerHandler $playerHandler;
+	/** @var ChatHandler */
+	private static ChatHandler $chatHandler;
+	/** @var RankHandler */
+	private static RankHandler $rankHandler;
+	/** @var ItemHandler */
+	private static ItemHandler $itemHandler;
+	/** @var KitHandler */
+	private static KitHandler $kitHandler;
+	/** @var ArenaHandler */
+	private static ArenaHandler $arenaHandler;
+	/** @var DuelHandler */
+	private static DuelHandler $duelHandler;
+	/** @var IvsIHandler */
+	private static IvsIHandler $ivsiHandler;
+	/** @var ReportHandler */
+	private static ReportHandler $reportHandler;
+	/* @var PermissionsHandler */
+	private static PermissionsHandler $permissionsHandler;
+	/** @var PartyManager */
+	private static PartyManager $partyManager;
+	/** @var IPHandler */
+	private static IPHandler $ipHandler;
+	/** @var MysqlManager */
+	private static MysqlManager $mysqlManager;
 
-    /** @var bool */
-    private bool $serverMuted;
+	/** @var bool */
+	private bool $serverMuted;
 
-    /**
-     * @return PracticeCore
-     */
-    public static function getInstance(): PracticeCore
-    {
-        return self::$instance;
-    }
+	/**
+	 * @return PracticeCore
+	 */
+	public static function getInstance() : PracticeCore{
+		return self::$instance;
+	}
 
-    /**
-     * @return ChatHandler
-     */
-    public static function getChatHandler(): ChatHandler
-    {
-        return self::$chatHandler;
-    }
+	/**
+	 * @return ChatHandler
+	 */
+	public static function getChatHandler() : ChatHandler{
+		return self::$chatHandler;
+	}
 
-    /**
-     * @return PlayerHandler
-     */
-    public static function getPlayerHandler(): PlayerHandler
-    {
-        return self::$playerHandler;
-    }
+	/**
+	 * @return PlayerHandler
+	 */
+	public static function getPlayerHandler() : PlayerHandler{
+		return self::$playerHandler;
+	}
 
-    /**
-     * @return RankHandler
-     */
-    public static function getRankHandler(): RankHandler
-    {
-        return self::$rankHandler;
-    }
+	/**
+	 * @return RankHandler
+	 */
+	public static function getRankHandler() : RankHandler{
+		return self::$rankHandler;
+	}
 
-    /**
-     * @return ItemHandler
-     */
-    public static function getItemHandler(): ItemHandler
-    {
-        return self::$itemHandler;
-    }
+	/**
+	 * @return ItemHandler
+	 */
+	public static function getItemHandler() : ItemHandler{
+		return self::$itemHandler;
+	}
 
-    /**
-     * @return KitHandler
-     */
-    public static function getKitHandler(): KitHandler
-    {
-        return self::$kitHandler;
-    }
+	/**
+	 * @return KitHandler
+	 */
+	public static function getKitHandler() : KitHandler{
+		return self::$kitHandler;
+	}
 
-    /**
-     * @return ArenaHandler
-     */
-    public static function getArenaHandler(): ArenaHandler
-    {
-        return self::$arenaHandler;
-    }
+	/**
+	 * @return ArenaHandler
+	 */
+	public static function getArenaHandler() : ArenaHandler{
+		return self::$arenaHandler;
+	}
 
-    /**
-     * @return DuelHandler
-     */
-    public static function getDuelHandler(): DuelHandler
-    {
-        return self::$duelHandler;
-    }
+	/**
+	 * @return DuelHandler
+	 */
+	public static function getDuelHandler() : DuelHandler{
+		return self::$duelHandler;
+	}
 
-    /**
-     * @return IvsIHandler
-     */
-    public static function get1vs1Handler(): IvsIHandler
-    {
-        return self::$ivsiHandler;
-    }
+	/**
+	 * @return IvsIHandler
+	 */
+	public static function get1vs1Handler() : IvsIHandler{
+		return self::$ivsiHandler;
+	}
 
-    /**
-     * @return ReportHandler
-     */
-    public static function getReportHandler(): ReportHandler
-    {
-        return self::$reportHandler;
-    }
+	/**
+	 * @return ReportHandler
+	 */
+	public static function getReportHandler() : ReportHandler{
+		return self::$reportHandler;
+	}
 
-    /**
-     * @return PermissionsHandler
-     */
-    public static function getPermissionHandler(): PermissionsHandler
-    {
-        return self::$permissionsHandler;
-    }
+	/**
+	 * @return PermissionsHandler
+	 */
+	public static function getPermissionHandler() : PermissionsHandler{
+		return self::$permissionsHandler;
+	}
 
-    /**
-     * @return PartyManager
-     */
-    public static function getPartyManager(): PartyManager
-    {
-        return self::$partyManager;
-    }
+	/**
+	 * @return PartyManager
+	 */
+	public static function getPartyManager() : PartyManager{
+		return self::$partyManager;
+	}
 
-    /**
-     * @return IPHandler
-     */
-    public static function getIPHandler(): IPHandler
-    {
-        return self::$ipHandler;
-    }
+	/**
+	 * @return IPHandler
+	 */
+	public static function getIPHandler() : IPHandler{
+		return self::$ipHandler;
+	}
 
-    /**
-     * @return MysqlManager
-     */
-    public static function getMysqlHandler(): MysqlManager
-    {
-        return self::$mysqlManager;
-    }
+	/**
+	 * @return MysqlManager
+	 */
+	public static function getMysqlHandler() : MysqlManager{
+		return self::$mysqlManager;
+	}
 
-    /**
-     * @return void
-     */
-    public function onEnable(): void
-    {
-        if(!class_exists(InvMenuHandler::class)){
-            $this->getServer()->getLogger()->info("InvMenu not found!");
-            $this->getServer()->shutdown();
-        }
+	/**
+	 * @return void
+	 */
+	public function onEnable() : void{
+		if(!InvMenuHandler::isRegistered()) {
+			InvMenuHandler::register($this);
+		}
 
-        if(!InvMenuHandler::isRegistered()) InvMenuHandler::register($this);
+		$this->registerEntities();
 
-        $this->loadWorlds();
+		$this->initDataFolder();
+		$this->saveDefaultConfig();
+		$this->initMessageConfig();
+		$this->initMysqlConfig();
+		$this->initNameConfig();
+		$this->initRankConfig();
+		$this->initFilteredWordsConfig();
+		$this->initCommands();
 
-        $this->registerEntities();
+		self::$instance = $this;
 
-        date_default_timezone_set("America/Los_Angeles");
+		self::$playerHandler = new PlayerHandler($this);
+		self::$kitHandler = new KitHandler();
+		self::$arenaHandler = new ArenaHandler();
 
-        $this->initDataFolder();
-        $this->saveDefaultConfig();
-        $this->initMessageConfig();
-        $this->initMysqlConfig();
-        $this->initNameConfig();
-        $this->initRankConfig();
-        $this->initCommands();
+		self::$mysqlManager = new MysqlManager($this->getDataFolder());
 
-        self::$instance = $this;
+		if(!PracticeUtil::isMysqlEnabled()) {
+			self::$playerHandler->updateLeaderboards();
+		}
 
-        self::$playerHandler = new PlayerHandler($this);
-        self::$kitHandler = new KitHandler();
-        self::$arenaHandler = new ArenaHandler();
+		self::$itemHandler = new ItemHandler($this);
+		self::$rankHandler = new RankHandler();
+		self::$chatHandler = new ChatHandler(str_replace("\\", DIRECTORY_SEPARATOR, str_replace("/", DIRECTORY_SEPARATOR, $this->getDataFolder())) . DIRECTORY_SEPARATOR . "filtered_words.txt");
+		self::$duelHandler = new DuelHandler();
+		self::$ivsiHandler = new IvsIHandler();
+		self::$reportHandler = new ReportHandler();
+		self::$permissionsHandler = new PermissionsHandler($this);
+		self::$partyManager = new PartyManager();
+		self::$ipHandler = new IPHandler($this);
 
-        self::$mysqlManager = new MysqlManager($this->getDataFolder());
+		$this->serverMuted = false;
 
-        if (!PracticeUtil::isMysqlEnabled()) self::$playerHandler->updateLeaderboards();
+		PracticeUtil::reloadPlayers();
 
-        self::$itemHandler = new ItemHandler($this);
-        self::$rankHandler = new RankHandler();
-        self::$chatHandler = new ChatHandler();
-        self::$duelHandler = new DuelHandler();
-        self::$ivsiHandler = new IvsIHandler();
-        self::$reportHandler = new ReportHandler();
-        self::$permissionsHandler = new PermissionsHandler($this);
-        self::$partyManager = new PartyManager();
-        self::$ipHandler = new IPHandler($this);
+		$this->getServer()->getPluginManager()->registerEvents(new PracticeListener($this), $this);
 
-        $this->serverMuted = false;
+		$scheduler = $this->getScheduler();
+		$scheduler->scheduleDelayedTask(new SetTimeDayTask($this), 10);
+		$scheduler->scheduleDelayedTask(new PermissionsToCfgTask(), 10);
+		$scheduler->scheduleRepeatingTask(new PracticeTask($this), 1);
+	}
 
-        PracticeUtil::reloadPlayers();
+	/**
+	 * @return void
+	 */
+	private function registerEntities() : void{
+		EntityFactory::getInstance()->register(SplashPotion::class, function(World $world, CompoundTag $nbt) : SplashPotion{
+			$potionType = PotionTypeIdMap::getInstance()->fromId($nbt->getShort("PotionId", PotionTypeIds::WATER));
+			if($potionType === null){
+				throw new UnexpectedValueException("No such potion type");
+			}
+			return new SplashPotion(EntityDataHelper::parseLocation($nbt, $world), null, $potionType, $nbt);
+		}, ["ThrownPotion", "minecraft:potion", "thrownpotion"], EntityLegacyIds::SPLASH_POTION);
 
-        $scheduler = $this->getScheduler();
+		EntityFactory::getInstance()->register(FishingHook::class, function(World $world, CompoundTag $nbt) : FishingHook{
+			return new FishingHook(EntityDataHelper::parseLocation($nbt, $world), null, $nbt);
+		}, ["FishingHook", "minecraft:fishing_hook"], EntityLegacyIds::FISHING_HOOK);
+	}
 
-        $this->getServer()->getPluginManager()->registerEvents(new PracticeListener($this), $this);
-        $scheduler->scheduleDelayedTask(new SetTimeDayTask($this), 10);
-        $scheduler->scheduleDelayedTask(new PermissionsToCfgTask(), 10);
-        $scheduler->scheduleRepeatingTask(new PracticeTask($this), 1);
-    }
+	/**
+	 * @return void
+	 */
+	private function initDataFolder() : void{
+		$dataFolder = $this->getDataFolder();
 
-    /**
-     * @return void
-     */
-    private function loadWorlds(): void
-    {
-        $worlds = PracticeUtil::getWorldsFromFolder($this);
+		if(!is_dir($dataFolder)) mkdir($dataFolder);
+	}
 
-        $size = count($worlds);
+	/**
+	 * @return void
+	 */
+	private function initMessageConfig() : void{
+		$this->saveResource("messages.yml");
+	}
 
-        if ($size > 0) {
-            foreach ($worlds as $world) PracticeUtil::loadWorld($world);
-        }
-    }
+	/**
+	 * @return void
+	 */
+	private function initMysqlConfig() : void{
+		$this->saveResource("mysql.yml");
+	}
 
-    /**
-     * @return void
-     */
-    private function registerEntities(): void
-    {
-        EntityFactory::getInstance()->register(SplashPotion::class, function (World $world, CompoundTag $nbt): SplashPotion {
-            $potionType = PotionTypeIdMap::getInstance()->fromId($nbt->getShort("PotionId", PotionTypeIds::WATER));
-            if ($potionType === null) {
-                throw new UnexpectedValueException("No such potion type");
-            }
-            return new SplashPotion(EntityDataHelper::parseLocation($nbt, $world), null, $potionType, $nbt);
-        }, ["ThrownPotion", "minecraft:potion", "thrownpotion"], EntityLegacyIds::SPLASH_POTION);
+	/**
+	 * @return void
+	 */
+	private function initNameConfig() : void{
+		$this->saveResource("names.yml");
+	}
 
-        EntityFactory::getInstance()->register(FishingHook::class, function (World $world, CompoundTag $nbt): FishingHook {
-            return new FishingHook(EntityDataHelper::parseLocation($nbt, $world), null, $nbt);
-        }, ["FishingHook", "minecraft:fishing_hook"], EntityLegacyIds::FISHING_HOOK);
-    }
+	/**
+	 * @return void
+	 */
+	private function initRankConfig() : void{
+		$this->saveResource("ranks.yml");
+	}
 
-    /**
-     * @return void
-     */
-    private function initDataFolder(): void
-    {
-        $dataFolder = $this->getDataFolder();
+	/**
+	 * @return void
+	 */
+	private function initFilteredWordsConfig() : void{
+		$this->saveResource("filtered_words.txt");
+	}
 
-        if (!is_dir($dataFolder)) mkdir($dataFolder);
-    }
+	/**
+	 * @return void
+	 */
+	private function initCommands() : void{
+		$this->registerCommand(new KitCommand());
+		$this->registerCommand(new ExtinguishCommand());
+		$this->registerCommand(new ClearInventoryCommand());
+		$this->registerCommand(new FeedCommand());
+		$this->registerCommand(new FlyCommand());
+		$this->registerCommand(new FreezeCommand());
+		$this->registerCommand(new FreezeCommand(false));
+		$this->registerCommand(new MuteCommand());
+		$this->registerCommand(new RankCommand());
+		$this->registerCommand(new SpawnCommand());
+		$this->registerCommand(new ArenaCommand());
+		$this->registerCommand(new HealCommand());
+		$this->registerCommand(new DuelCommand());
+		$this->registerCommand(new AcceptCommand());
+		$this->registerCommand(new ReportCommand());
+		$this->registerCommand(new SpectateCommand());
+		$this->registerCommand(new StatsCommand());
+		$this->registerCommand(new PingCommand());
+		$this->registerCommand(new TeleportLevelCommand());
+		$this->registerCommand(new KickAllCommand());
+		$this->registerCommand(new PlayerInfoCommand());
 
-    /**
-     * @return void
-     */
-    private function initMessageConfig(): void
-    {
-        $this->saveResource("messages.yml");
-    }
+		$this->unregisterCommand("me");
+		$this->unregisterCommand("tell");
+	}
 
-    /**
-     * @return void
-     */
-    private function initMysqlConfig(): void
-    {
-        $this->saveResource("mysql.yml");
-    }
+	/**
+	 * @param Command $cmd
+	 *
+	 * @return void
+	 */
+	private function registerCommand(Command $cmd) : void{
+		$this->getServer()->getCommandMap()->register($cmd->getName(), $cmd);
+	}
 
-    /**
-     * @return void
-     */
-    private function initNameConfig(): void
-    {
-        $this->saveResource("names.yml");
-    }
+	/**
+	 * @param string $name
+	 *
+	 * @return void
+	 */
+	private function unregisterCommand(string $name) : void{
+		$map = $this->getServer()->getCommandMap();
+		$cmd = $map->getCommand($name);
+		if($cmd !== null) $this->getServer()->getCommandMap()->unregister($cmd);
+	}
 
-    /**
-     * @return void
-     */
-    private function initRankConfig(): void
-    {
-        $this->saveResource("ranks.yml");
-    }
+	/**
+	 * @return void
+	 */
+	public function onLoad() : void{
+		PracticeUtil::initiateWorlds();
+	}
 
-    /**
-     * @return void
-     */
-    private function initCommands(): void
-    {
-        $this->registerCommand(new KitCommand());
-        $this->registerCommand(new ExtinguishCommand());
-        $this->registerCommand(new ClearInventoryCommand());
-        $this->registerCommand(new FeedCommand());
-        $this->registerCommand(new FlyCommand());
-        $this->registerCommand(new FreezeCommand());
-        $this->registerCommand(new FreezeCommand(false));
-        $this->registerCommand(new MuteCommand());
-        $this->registerCommand(new RankCommand());
-        $this->registerCommand(new SpawnCommand());
-        $this->registerCommand(new ArenaCommand());
-        $this->registerCommand(new HealCommand());
-        $this->registerCommand(new DuelCommand());
-        $this->registerCommand(new AcceptCommand());
-        $this->registerCommand(new ReportCommand());
-        $this->registerCommand(new SpectateCommand());
-        $this->registerCommand(new StatsCommand());
-        $this->registerCommand(new PingCommand());
-        $this->registerCommand(new TeleportLevelCommand());
-        $this->registerCommand(new KickAllCommand());
-        $this->registerCommand(new PlayerInfoCommand());
+	/**
+	 * @return bool
+	 */
+	public function isServerMuted() : bool{
+		return $this->serverMuted;
+	}
 
-        $this->unregisterCommand("me");
-        $this->unregisterCommand("tell");
-    }
+	/**
+	 * @param bool $mute
+	 *
+	 * @return void
+	 */
+	public function setServerMuted(bool $mute) : void{
+		$this->serverMuted = $mute;
+	}
 
-    /**
-     * @param Command $cmd
-     * @return void
-     */
-    private function registerCommand(Command $cmd): void
-    {
-        $this->getServer()->getCommandMap()->register($cmd->getName(), $cmd);
-    }
+	/**
+	 * @return Config
+	 */
+	public function getMessageConfig() : Config{
+		$path = $this->getDataFolder() . "messages.yml";
+		return new Config($path, Config::YAML);
+	}
 
-    /**
-     * @param string $name
-     * @return void
-     */
-    private function unregisterCommand(string $name): void
-    {
-        $map = $this->getServer()->getCommandMap();
-        $cmd = $map->getCommand($name);
-        if ($cmd !== null) $this->getServer()->getCommandMap()->unregister($cmd);
-    }
+	/**
+	 * @return Config
+	 */
+	public function getRankConfig() : Config{
+		$path = $this->getDataFolder() . "ranks.yml";
+		return new Config($path, Config::YAML);
+	}
 
-    /**
-     * @return void
-     */
-    public function onLoad(): void
-    {
-        $this->loadWorlds();
-    }
+	/**
+	 * @return Config
+	 */
+	public function getNameConfig() : Config{
+		$path = $this->getDataFolder() . "names.yml";
+		return new Config($path, Config::YAML);
+	}
 
-    /**
-     * @return bool
-     */
-    public function isServerMuted(): bool
-    {
-        return $this->serverMuted;
-    }
+	/**
+	 * @param CommandSender $sender
+	 * @param Command       $command
+	 * @param string        $label
+	 * @param array         $args
+	 *
+	 * @return bool
+	 */
+	public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
+		return parent::onCommand($sender, $command, $label, $args);
+	}
 
-    /**
-     * @param bool $mute
-     * @return void
-     */
-    public function setServerMuted(bool $mute): void
-    {
-        $this->serverMuted = $mute;
-    }
-
-    /**
-     * @return Config
-     */
-    public function getMessageConfig(): Config
-    {
-        $path = $this->getDataFolder() . "messages.yml";
-        return new Config($path, Config::YAML);
-    }
-
-    /**
-     * @return Config
-     */
-    public function getRankConfig(): Config
-    {
-        $path = $this->getDataFolder() . "ranks.yml";
-        return new Config($path, Config::YAML);
-    }
-
-    /**
-     * @return Config
-     */
-    public function getNameConfig(): Config
-    {
-        $path = $this->getDataFolder() . "names.yml";
-        return new Config($path, Config::YAML);
-    }
-
-    /**
-     * @param CommandSender $sender
-     * @param Command $command
-     * @param string $label
-     * @param array $args
-     * @return bool
-     */
-    public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool
-    {
-        return parent::onCommand($sender, $command, $label, $args);
-    }
-
-    /**
-     * @return string
-     */
-    #[Pure] public function getResourcesFolder(): string
-    {
-        return $this->getFile() . 'resources/';
-    }
+	/**
+	 * @return string
+	 */
+	#[Pure] public function getResourcesFolder() : string{
+		return $this->getFile() . 'resources/';
+	}
 }

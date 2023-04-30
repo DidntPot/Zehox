@@ -13,110 +13,108 @@ use practice\commands\parameters\SimpleParameter;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
-class MuteCommand extends BaseCommand
-{
-    public function __construct()
-    {
-        parent::__construct("mute", "The base mute command.", "/mute help");
+class MuteCommand extends BaseCommand{
+	public function __construct(){
+		parent::__construct("mute", "The base mute command.", "/mute help");
 
-        $parameters = [
-            0 => [
-                new BaseParameter("help", $this->getPermission(), "Displays all mute commands."),
-            ],
-            1 => [
-                new BaseParameter("server", $this->getPermission(), "Mutes/unmutes all players on the server."),
-                new SimpleParameter("mute", Parameter::PARAMTYPE_BOOLEAN)
-            ],
-            2 => [
-                new SimpleParameter("player", Parameter::PARAMTYPE_TARGET, $this->getPermission(), "Mutes/unmutes a player on the server."),
-                new SimpleParameter("mute", Parameter::PARAMTYPE_BOOLEAN)
-            ]
-        ];
-        self::setParameters($parameters);
-    }
+		$parameters = [
+			0 => [
+				new BaseParameter("help", $this->getPermission(), "Displays all mute commands."),
+			],
+			1 => [
+				new BaseParameter("server", $this->getPermission(), "Mutes/unmutes all players on the server."),
+				new SimpleParameter("mute", Parameter::PARAMTYPE_BOOLEAN)
+			],
+			2 => [
+				new SimpleParameter("player", Parameter::PARAMTYPE_TARGET, $this->getPermission(), "Mutes/unmutes a player on the server."),
+				new SimpleParameter("mute", Parameter::PARAMTYPE_BOOLEAN)
+			]
+		];
+		self::setParameters($parameters);
+	}
 
-    /**
-     * @param CommandSender $sender
-     * @param string $commandLabel
-     * @param array $args
-     * @return void
-     */
-    public function execute(CommandSender $sender, string $commandLabel, array $args): void
-    {
-        $msg = null;
-        if (self::canExecute($sender, $args)) {
-            $name = strval($args[0]);
-            switch ($name) {
-                case "help":
-                    $msg = $this->getFullUsage();
-                    break;
-                case "server":
-                    $mute = $this->getBoolean($args[1]);
-                    PracticeCore::getInstance()->setServerMuted($mute);
-                    $str = ($mute ? "enabled" : "disabled");
-                    PracticeUtil::broadcastMsg(PracticeUtil::getMessage("general.mute.sm-$str"));
-                    if (!($sender instanceof Player)) $msg = PracticeUtil::getMessage("general.mute.sm-$str");
-                    break;
-                default:
-                    $mute = $this->getBoolean($args[1]);
-                    self::mutePlayer($sender, $name, $mute);
-            }
-        }
-        if (!is_null($msg)) $sender->sendMessage($msg);
-    }
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $commandLabel
+	 * @param array         $args
+	 *
+	 * @return void
+	 */
+	public function execute(CommandSender $sender, string $commandLabel, array $args) : void{
+		$msg = null;
+		if(self::canExecute($sender, $args)){
+			$name = strval($args[0]);
+			switch($name){
+				case "help":
+					$msg = $this->getFullUsage();
+					break;
+				case "server":
+					$mute = $this->getBoolean($args[1]);
+					PracticeCore::getInstance()->setServerMuted($mute);
+					$str = ($mute ? "enabled" : "disabled");
+					PracticeUtil::broadcastMsg(PracticeUtil::getMessage("general.mute.sm-$str"));
+					if(!($sender instanceof Player)) $msg = PracticeUtil::getMessage("general.mute.sm-$str");
+					break;
+				default:
+					$mute = $this->getBoolean($args[1]);
+					self::mutePlayer($sender, $name, $mute);
+			}
+		}
+		if(!is_null($msg)) $sender->sendMessage($msg);
+	}
 
-    /**
-     * @param CommandSender $sender
-     * @param string $playerName
-     * @param bool $mute
-     * @return void
-     */
-    private static function mutePlayer(CommandSender $sender, string $playerName, bool $mute): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($playerName)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($playerName);
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $playerName
+	 * @param bool          $mute
+	 *
+	 * @return void
+	 */
+	private static function mutePlayer(CommandSender $sender, string $playerName, bool $mute) : void{
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($playerName)){
+			$p = PracticeCore::getPlayerHandler()->getPlayer($playerName);
 
-            $playerMsg = null;
+			$playerMsg = null;
 
-            if (PracticeCore::getPlayerHandler()->isPlayerMuted($playerName)) {
+			if(PracticeCore::getPlayerHandler()->isPlayerMuted($playerName)){
 
-                if ($mute) {
-                    $str = ($sender->getName() === $playerName ? "You" : $playerName);
-                    $msg = PracticeUtil::getMessage("general.mute.already-muted");
-                    $msg = strval(str_replace("%player%", $str, $msg));
-                } else {
-                    PracticeCore::getPlayerHandler()->unmutePlayer($playerName);
-                    if ($sender->getName() === $playerName) {
-                        $msg = PracticeUtil::getMessage("general.mute.not-muted-personal");
-                    } else {
-                        $msg = PracticeUtil::getMessage("general.mute.not-muted-op");
-                        $msg = strval(str_replace("%player%", $playerName, $msg));
-                        $playerMsg = PracticeUtil::getMessage("general.mute.not-muted-personal");
-                    }
-                }
-            } else {
+				if($mute){
+					$str = ($sender->getName() === $playerName ? "You" : $playerName);
+					$msg = PracticeUtil::getMessage("general.mute.already-muted");
+					$msg = strval(str_replace("%player%", $str, $msg));
+				}else{
+					PracticeCore::getPlayerHandler()->unmutePlayer($playerName);
+					if($sender->getName() === $playerName){
+						$msg = PracticeUtil::getMessage("general.mute.not-muted-personal");
+					}else{
+						$msg = PracticeUtil::getMessage("general.mute.not-muted-op");
+						$msg = strval(str_replace("%player%", $playerName, $msg));
+						$playerMsg = PracticeUtil::getMessage("general.mute.not-muted-personal");
+					}
+				}
+			}else{
 
-                if ($mute) {
-                    PracticeCore::getPlayerHandler()->mutePlayer($playerName);
-                    if ($sender->getName() === $playerName) {
-                        $msg = PracticeUtil::getMessage("general.mute.mute-personal");
-                    } else {
-                        $msg = PracticeUtil::getMessage("general.mute.mute-op");
-                        $msg = strval(str_replace("%player%", $playerName, $msg));
-                        $playerMsg = PracticeUtil::getMessage("general.mute.mute-personal");
-                    }
-                } else {
-                    $str = ($sender->getName() === $playerName ? "You" : $playerName);
-                    $msg = PracticeUtil::getMessage("general.mute.already-unmuted");
-                    $msg = strval(str_replace("%player%", $str, $msg));
-                }
-            }
+				if($mute){
+					PracticeCore::getPlayerHandler()->mutePlayer($playerName);
+					if($sender->getName() === $playerName){
+						$msg = PracticeUtil::getMessage("general.mute.mute-personal");
+					}else{
+						$msg = PracticeUtil::getMessage("general.mute.mute-op");
+						$msg = strval(str_replace("%player%", $playerName, $msg));
+						$playerMsg = PracticeUtil::getMessage("general.mute.mute-personal");
+					}
+				}else{
+					$str = ($sender->getName() === $playerName ? "You" : $playerName);
+					$msg = PracticeUtil::getMessage("general.mute.already-unmuted");
+					$msg = strval(str_replace("%player%", $str, $msg));
+				}
+			}
 
-            if (!is_null($playerMsg)) $p->sendMessage($playerMsg);
-        } else {
-            $msg = PracticeUtil::getMessage("not-online");
-            $msg = strval(str_replace("%player-name%", $playerName, $msg));
-        }
-        if (!is_null($msg)) $sender->sendMessage($msg);
-    }
+			if(!is_null($playerMsg)) $p->sendMessage($playerMsg);
+		}else{
+			$msg = PracticeUtil::getMessage("not-online");
+			$msg = strval(str_replace("%player-name%", $playerName, $msg));
+		}
+		if(!is_null($msg)) $sender->sendMessage($msg);
+	}
 }

@@ -4,661 +4,654 @@ declare(strict_types=1);
 
 namespace practice\game;
 
-use jojoe77777\FormAPI\CustomForm;
-use jojoe77777\FormAPI\SimpleForm;
 use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use practice\duels\groups\Request;
+use practice\forms\CustomForm;
+use practice\forms\SimpleForm;
 use practice\game\items\PracticeItem;
 use practice\player\gameplay\reports\AbstractReport;
 use practice\player\gameplay\reports\ReportInfo;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
-class FormUtil
-{
-    /**
-     * @param bool $ranked
-     * @return SimpleForm
-     */
-    public static function getMatchForm(bool $ranked = false): SimpleForm
-    {
+class FormUtil{
+	/**
+	 * @param bool $ranked
+	 *
+	 * @return SimpleForm
+	 */
+	public static function getMatchForm(bool $ranked = false) : SimpleForm{
 
-        $replace = ($ranked ? 'Ranked' : 'Unranked');
+		$replace = ($ranked ? 'Ranked' : 'Unranked');
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-            $formData = [];
+			$formData = [];
 
-            $playerHandler = PracticeCore::getPlayerHandler();
+			$playerHandler = PracticeCore::getPlayerHandler();
 
-            $ivsiHandler = PracticeCore::get1vs1Handler();
+			$ivsiHandler = PracticeCore::get1vs1Handler();
 
-            if (PracticeCore::getPlayerHandler()->isPlayerOnline($event))
-                $formData = $playerHandler->getPlayer($event)->removeForm();
+			if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
+				$formData = $playerHandler->getPlayer($event)->removeForm();
 
-            if (is_null($data)) {
+			if(is_null($data)){
 
-                if ($ivsiHandler->isLoadingRequest($event)) $ivsiHandler->cancelRequest($event);
+				if($ivsiHandler->isLoadingRequest($event)) $ivsiHandler->cancelRequest($event);
 
-            } else {
-                if (is_int($data) and $playerHandler->isPlayerOnline($event)) {
+			}else{
+				if(is_int($data) and $playerHandler->isPlayerOnline($event)){
 
-                    $p = $playerHandler->getPlayer($event);
+					$p = $playerHandler->getPlayer($event);
 
-                    $buttonIndex = intval($data);
+					$buttonIndex = intval($data);
 
-                    $queue = $formData[$buttonIndex]['text'];
+					$queue = $formData[$buttonIndex]['text'];
 
-                    $index = PracticeUtil::str_indexOf("\n", $queue);
+					$index = PracticeUtil::str_indexOf("\n", $queue);
 
-                    if ($index !== -1)
-                        $queue = substr($queue, 0, $index);
+					if($index !== -1)
+						$queue = substr($queue, 0, $index);
 
-                    $queue = PracticeUtil::getUncoloredString($queue);
+					$queue = PracticeUtil::getUncoloredString($queue);
 
-                    if (PracticeCore::getKitHandler()->isDuelKit($queue)) PracticeCore::getDuelHandler()->addPlayerToQueue($p->getPlayerName(), $queue, boolval($formData['ranked']));
+					if(PracticeCore::getKitHandler()->isDuelKit($queue)) PracticeCore::getDuelHandler()->addPlayerToQueue($p->getPlayerName(), $queue, boolval($formData['ranked']));
 
-                }
-            }
+				}
+			}
 
-        });
+		});
 
-        $form->setTitle(PracticeUtil::str_replace(PracticeUtil::getMessage('formwindow.duel.title'), ['%ranked%' => $replace]));
+		$form->setTitle(PracticeUtil::str_replace(PracticeUtil::getMessage('formwindow.duel.title'), ['%ranked%' => $replace]));
 
-        $items = PracticeCore::getItemHandler()->getDuelItems();
+		$items = PracticeCore::getItemHandler()->getDuelItems();
 
-        foreach ($items as $duelItem) {
+		foreach($items as $duelItem){
 
-            if ($duelItem instanceof PracticeItem) {
+			if($duelItem instanceof PracticeItem){
 
-                $name = $duelItem->getName();
+				$name = $duelItem->getName();
 
-                $uncolored = PracticeUtil::getUncoloredString($name);
+				$uncolored = PracticeUtil::getUncoloredString($name);
 
-                $numInQueue = PracticeCore::getDuelHandler()->getNumQueuedFor($uncolored, $ranked);
+				$numInQueue = PracticeCore::getDuelHandler()->getNumQueuedFor($uncolored, $ranked);
 
-                $numInFights = PracticeCore::getDuelHandler()->getNumFightsFor($uncolored, $ranked);
+				$numInFights = PracticeCore::getDuelHandler()->getNumFightsFor($uncolored, $ranked);
 
-                $inQueues = "\n" . TextFormat::GOLD . '» ' . TextFormat::BLUE . 'In-Queues: ' . TextFormat::WHITE . $numInQueue;
+				$inQueues = "\n" . TextFormat::GOLD . '» ' . TextFormat::BLUE . 'In-Queues: ' . TextFormat::WHITE . $numInQueue;
 
-                $inFights = TextFormat::RED . 'In-Fights: ' . TextFormat::WHITE . $numInFights . TextFormat::GOLD . ' «';
+				$inFights = TextFormat::RED . 'In-Fights: ' . TextFormat::WHITE . $numInFights . TextFormat::GOLD . ' «';
 
-                $name .= $inQueues . TextFormat::DARK_GRAY . " | " . $inFights;
+				$name .= $inQueues . TextFormat::DARK_GRAY . " | " . $inFights;
 
-                $form->addButton($name, 0, $duelItem->getTexture());
-            }
-        }
+				$form->addButton($name, 0, $duelItem->getTexture());
+			}
+		}
 
-        return $form;
-    }
+		return $form;
+	}
 
-    /**
-     * @return SimpleForm
-     */
-    public static function getDuelsForm(): SimpleForm
-    {
+	/**
+	 * @return SimpleForm
+	 */
+	public static function getDuelsForm() : SimpleForm{
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-            $formData = [];
+			$formData = [];
 
-            $playerHandler = PracticeCore::getPlayerHandler();
+			$playerHandler = PracticeCore::getPlayerHandler();
 
-            $ivsiHandler = PracticeCore::get1vs1Handler();
+			$ivsiHandler = PracticeCore::get1vs1Handler();
 
-            if (PracticeCore::getPlayerHandler()->isPlayerOnline($event))
-                $formData = $playerHandler->getPlayer($event)->removeForm();
+			if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
+				$formData = $playerHandler->getPlayer($event)->removeForm();
 
-            if (is_null($data)) {
+			if(is_null($data)){
 
-                if ($ivsiHandler->isLoadingRequest($event)) $ivsiHandler->cancelRequest($event);
+				if($ivsiHandler->isLoadingRequest($event)) $ivsiHandler->cancelRequest($event);
 
-            } else {
-                if (is_int($data) and $playerHandler->isPlayerOnline($event)) {
+			}else{
+				if(is_int($data) and $playerHandler->isPlayerOnline($event)){
 
-                    $p = $playerHandler->getPlayer($event);
+					$p = $playerHandler->getPlayer($event);
 
-                    $buttonIndex = intval($data);
+					$buttonIndex = intval($data);
 
-                    $queue = $formData[$buttonIndex]['text'];
+					$queue = $formData[$buttonIndex]['text'];
 
-                    $queue = PracticeUtil::getUncoloredString($queue);
+					$queue = PracticeUtil::getUncoloredString($queue);
 
-                    $index = PracticeUtil::str_indexOf("\n", $queue);
+					$index = PracticeUtil::str_indexOf("\n", $queue);
 
-                    if ($index !== -1)
-                        $queue = substr($queue, 0, $index);
+					if($index !== -1)
+						$queue = substr($queue, 0, $index);
 
-                    $queue = PracticeUtil::getUncoloredString($queue);
+					$queue = PracticeUtil::getUncoloredString($queue);
 
-                    if ($ivsiHandler->isLoadingRequest($event)) {
+					if($ivsiHandler->isLoadingRequest($event)){
 
-                        $request = $ivsiHandler->getLoadedRequest($event);
+						$request = $ivsiHandler->getLoadedRequest($event);
 
-                        $requested = $request->getRequested();
+						$requested = $request->getRequested();
 
-                        if (PracticeCore::getKitHandler()->isDuelKit($queue)) $request->setQueue($queue);
+						if(PracticeCore::getKitHandler()->isDuelKit($queue)) $request->setQueue($queue);
 
-                        if (Request::canSend($p, $requested)) $ivsiHandler->sendRequest($event, $requested);
+						if(Request::canSend($p, $requested)) $ivsiHandler->sendRequest($event, $requested);
 
-                        else $ivsiHandler->cancelRequest($request);
+						else $ivsiHandler->cancelRequest($request);
 
-                    }
-                }
-            }
+					}
+				}
+			}
 
-        });
+		});
 
-        $form->setTitle(PracticeUtil::getName('title-duel-inventory'));
+		$form->setTitle(PracticeUtil::getName('title-duel-inventory'));
 
-        $items = PracticeCore::getItemHandler()->getDuelItems();
+		$items = PracticeCore::getItemHandler()->getDuelItems();
 
-        foreach ($items as $duelItem) {
-            if ($duelItem instanceof PracticeItem) {
-                $name = $duelItem->getName();
-                $form->addButton($name, 0, $duelItem->getTexture());
-            }
-        }
+		foreach($items as $duelItem){
+			if($duelItem instanceof PracticeItem){
+				$name = $duelItem->getName();
+				$form->addButton($name, 0, $duelItem->getTexture());
+			}
+		}
 
-        return $form;
-    }
+		return $form;
+	}
 
 
-    /**
-     * @return SimpleForm
-     */
-    public static function getFFAForm(): SimpleForm
-    {
+	/**
+	 * @return SimpleForm
+	 */
+	public static function getFFAForm() : SimpleForm{
 
-        $title = PracticeUtil::getMessage('formwindow.ffa.title');
-        $desc = PracticeUtil::getMessage('formwindow.ffa.content');
+		$title = PracticeUtil::getMessage('formwindow.ffa.title');
+		$desc = PracticeUtil::getMessage('formwindow.ffa.content');
 
-        $form = new SimpleForm(function (Player $event, $data = null) {
+		$form = new SimpleForm(function(Player $event, $data = null){
 
-            $formData = [];
+			$formData = [];
 
-            $playerHandler = PracticeCore::getPlayerHandler();
+			$playerHandler = PracticeCore::getPlayerHandler();
 
-            $arenaHandler = PracticeCore::getArenaHandler();
+			$arenaHandler = PracticeCore::getArenaHandler();
 
-            if ($playerHandler->isPlayerOnline($event))
-                $formData = $playerHandler->getPlayer($event)->removeForm();
+			if($playerHandler->isPlayerOnline($event))
+				$formData = $playerHandler->getPlayer($event)->removeForm();
 
 
-            if (is_int($data) and $playerHandler->isPlayerOnline($event)) {
+			if(is_int($data) and $playerHandler->isPlayerOnline($event)){
 
-                $p = $playerHandler->getPlayer($event);
+				$p = $playerHandler->getPlayer($event);
 
-                $ffaArenaIndex = intval($data);
+				$ffaArenaIndex = intval($data);
 
-                $arenaName = $formData[$ffaArenaIndex]['text'];
+				$arenaName = $formData[$ffaArenaIndex]['text'];
 
-                $index = PracticeUtil::str_indexOf("\n", $arenaName);
+				$index = PracticeUtil::str_indexOf("\n", $arenaName);
 
-                if ($index !== -1)
-                    $arenaName = substr($arenaName, 0, $index);
+				if($index !== -1)
+					$arenaName = substr($arenaName, 0, $index);
 
-                $arenaName = PracticeUtil::getUncoloredString($arenaName);
+				$arenaName = PracticeUtil::getUncoloredString($arenaName);
 
-                if ($arenaHandler->isFFAArena($arenaName)) {
+				if($arenaHandler->isFFAArena($name = str_replace(" FFA", "", $arenaName))){
+					$arena = $arenaHandler->getFFAArena($name);
 
-                    $arena = $arenaHandler->getFFAArena($arenaName);
+					$p->teleportToFFA($arena);
+					//PracticeCore::getInstance()->getScheduler()->scheduleDelayedTask(new TeleportArenaTask($p, $arena), 5);
+				}
+			}
+		});
 
-                    $p->teleportToFFA($arena);
-                    //PracticeCore::getInstance()->getScheduler()->scheduleDelayedTask(new TeleportArenaTask($p, $arena), 5);
-                }
-            }
-        });
+		$form->setTitle($title);
+		$form->setContent($desc);
 
-        $form->setTitle($title);
-        $form->setContent($desc);
+		$itemHandler = PracticeCore::getItemHandler();
 
-        $itemHandler = PracticeCore::getItemHandler();
+		$items = $itemHandler->getFFAItems();
 
-        $items = $itemHandler->getFFAItems();
+		foreach($items as $item){
 
-        foreach ($items as $item) {
+			if($item instanceof PracticeItem){
 
-            if ($item instanceof PracticeItem) {
+				$name = $item->getName();
+				$numPlayers = PracticeCore::getArenaHandler()->getNumPlayersInArena($name);
+				$name .= "\n" . TextFormat::RED . 'Players: ' . TextFormat::WHITE . $numPlayers;
 
-                $name = $item->getName();
-                $numPlayers = PracticeCore::getArenaHandler()->getNumPlayersInArena($name);
-                $name .= "\n" . TextFormat::RED . 'Players: ' . TextFormat::WHITE . $numPlayers;
+				$texture = $item->getTexture();
+				$form->addButton($name, 0, $texture);
+			}
+		}
 
-                $texture = $item->getTexture();
-                $form->addButton($name, 0, $texture);
-            }
-        }
+		return $form;
+	}
 
-        return $form;
-    }
+	/**
+	 * @return CustomForm
+	 */
+	public static function getReportBugForm() : CustomForm{
 
-    /**
-     * @return CustomForm
-     */
-    public static function getReportBugForm(): CustomForm
-    {
+		$title = 'Report a Bug';
 
-        $title = 'Report a Bug';
+		$occurrenceContent = 'Describe WHEN the bug occurs and HOW to recreate it:';
 
-        $occurrenceContent = 'Describe WHEN the bug occurs and HOW to recreate it:';
+		$descriptionContent = 'Describe WHAT happens when the bug occurs:';
 
-        $descriptionContent = 'Describe WHAT happens when the bug occurs:';
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+			if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
+				PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
 
-            if (PracticeCore::getPlayerHandler()->isPlayerOnline($event))
-                PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+			if(!is_null($data) and is_array($data)){
 
-            if (!is_null($data) and is_array($data)) {
+				$occurrenceIndex = 0;
+				$descIndex = 1;
 
-                $occurrenceIndex = 0;
-                $descIndex = 1;
+				$occurrence = strval($data[$occurrenceIndex]);
+				$desc = strval($data[$descIndex]);
 
-                $occurrence = strval($data[$occurrenceIndex]);
-                $desc = strval($data[$descIndex]);
+				PracticeCore::getReportHandler()->createBugReport($event->getName(), $occurrence, $desc);
 
-                PracticeCore::getReportHandler()->createBugReport($event->getName(), $occurrence, $desc);
+				$msg = 'Successfully reported a bug. It will get fixed soon!';
 
-                $msg = 'Successfully reported a bug. It will get fixed soon!';
+				$event->sendMessage($msg);
+			}
+		});
 
-                $event->sendMessage($msg);
-            }
-        });
+		$form->setTitle($title);
 
-        $form->setTitle($title);
+		$form->addInput($occurrenceContent);
 
-        $form->addInput($occurrenceContent);
+		$form->addInput($descriptionContent);
 
-        $form->addInput($descriptionContent);
+		return $form;
+	}
 
-        return $form;
-    }
+	/**
+	 * @param string $excludedName
+	 *
+	 * @return CustomForm
+	 */
+	public static function getReportHackForm(string $excludedName = '') : CustomForm{
 
-    /**
-     * @param string $excludedName
-     * @return CustomForm
-     */
-    public static function getReportHackForm(string $excludedName = ''): CustomForm
-    {
+		$title = 'Report a Player!';
 
-        $title = 'Report a Player!';
+		$reportedPlayerContent = 'Select the player to report:';
 
-        $reportedPlayerContent = 'Select the player to report:';
+		$descriptionContent = 'Describe the reasons for reporting this player:';
 
-        $descriptionContent = 'Describe the reasons for reporting this player:';
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+			$formData = [];
 
-            $formData = [];
+			if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
+				$formData = PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
 
-            if (PracticeCore::getPlayerHandler()->isPlayerOnline($event))
-                $formData = PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+			if(!is_null($data) and is_array($data)){
 
-            if (!is_null($data) and is_array($data)) {
+				$dropdownIndex = 0;
 
-                $dropdownIndex = 0;
+				$reasonIndex = 1;
 
-                $reasonIndex = 1;
+				$reason = strval($data[$reasonIndex]);
 
-                $reason = strval($data[$reasonIndex]);
+				$reportedIndex = $data[$dropdownIndex];
 
-                $reportedIndex = $data[$dropdownIndex];
+				if(count($formData[$dropdownIndex]['options']) > 0){
 
-                if (count($formData[$dropdownIndex]['options']) > 0) {
+					$reported = strval($formData[$dropdownIndex]['options'][$reportedIndex]);
 
-                    $reported = strval($formData[$dropdownIndex]['options'][$reportedIndex]);
+					PracticeCore::getReportHandler()->createStaffReport($event->getName(), $reported, $reason);
 
-                    PracticeCore::getReportHandler()->createStaffReport($event->getName(), $reported, $reason);
+					$event->sendMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('general.report.success'), ['%player%' => $reported]));
 
-                    $event->sendMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('general.report.success'), ['%player%' => $reported]));
+				}
+			}
+		});
 
-                }
-            }
-        });
+		$form->setTitle($title);
 
-        $form->setTitle($title);
+		$dropdownOptions = [];
 
-        $dropdownOptions = [];
+		$onlinePlayers = Server::getInstance()->getOnlinePlayers();
 
-        $onlinePlayers = Server::getInstance()->getOnlinePlayers();
+		foreach($onlinePlayers as $player){
+			if($player->getName() !== $excludedName){
+				$dropdownOptions[] = $player->getName();
+			}
+		}
 
-        foreach ($onlinePlayers as $player) {
-            if ($player->getName() !== $excludedName) {
-                $dropdownOptions[] = $player->getName();
-            }
-        }
+		$form->addDropdown($reportedPlayerContent, $dropdownOptions);
 
-        $form->addDropdown($reportedPlayerContent, $dropdownOptions);
+		$form->addInput($descriptionContent);
 
-        $form->addInput($descriptionContent);
+		return $form;
+	}
 
-        return $form;
-    }
+	/**
+	 * @param string $excludedName
+	 *
+	 * @return CustomForm
+	 */
+	public static function getReportStaffForm(string $excludedName = '') : CustomForm{
+		$title = 'Report a staff member!';
 
-    /**
-     * @param string $excludedName
-     * @return CustomForm
-     */
-    public static function getReportStaffForm(string $excludedName = ''): CustomForm
-    {
-        $title = 'Report a staff member!';
+		$reportedStaffContent = 'Select the staff member to report!';
 
-        $reportedStaffContent = 'Select the staff member to report!';
+		$descriptionContent = 'Describe the reasons for reporting this staff member:';
 
-        $descriptionContent = 'Describe the reasons for reporting this staff member:';
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+			$formData = [];
 
-            $formData = [];
+			if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
+				$formData = PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
 
-            if (PracticeCore::getPlayerHandler()->isPlayerOnline($event))
-                $formData = PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+			if(!is_null($data) and is_array($data)){
 
-            if (!is_null($data) and is_array($data)) {
+				$dropdownIndex = 0;
 
-                $dropdownIndex = 0;
+				$reasonIndex = 1;
 
-                $reasonIndex = 1;
+				$resReportedIndex = $data[$dropdownIndex];
 
-                $resReportedIndex = $data[$dropdownIndex];
+				if(count($formData[$dropdownIndex]['options']) > 0){
 
-                if (count($formData[$dropdownIndex]['options']) > 0) {
+					$reported = strval($formData[$dropdownIndex]['options'][$resReportedIndex]);
 
-                    $reported = strval($formData[$dropdownIndex]['options'][$resReportedIndex]);
+					$reason = strval($data[$reasonIndex]);
 
-                    $reason = strval($data[$reasonIndex]);
+					PracticeCore::getReportHandler()->createStaffReport($event->getName(), $reported, $reason);
 
-                    PracticeCore::getReportHandler()->createStaffReport($event->getName(), $reported, $reason);
+					$event->sendMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('general.report.success'), ['%player%' => $reported]));
 
-                    $event->sendMessage(PracticeUtil::str_replace(PracticeUtil::getMessage('general.report.success'), ['%player%' => $reported]));
+				}
+			}
+		});
 
-                }
-            }
-        });
+		$form->setTitle($title);
 
-        $form->setTitle($title);
+		$dropdownOptions = [];
 
-        $dropdownOptions = [];
+		$staffMembers = PracticeCore::getPlayerHandler()->getOnlineStaff();
 
-        $staffMembers = PracticeCore::getPlayerHandler()->getOnlineStaff();
+		foreach($staffMembers as $player){
+			$name = strval($player);
+			if($excludedName !== $name) $dropdownOptions[] = $name;
+		}
 
-        foreach ($staffMembers as $player) {
-            $name = strval($player);
-            if ($excludedName !== $name) $dropdownOptions[] = $name;
-        }
+		$form->addDropdown($reportedStaffContent, $staffMembers);
 
-        $form->addDropdown($reportedStaffContent, $staffMembers);
+		$form->addInput($descriptionContent);
 
-        $form->addInput($descriptionContent);
+		return $form;
+	}
 
-        return $form;
-    }
+	/**
+	 * @param int $timeFrame
+	 * @param int $reportType
+	 *
+	 * @return CustomForm
+	 */
+	public static function getReportsForm(int $timeFrame = ReportInfo::ALL_TIME, int $reportType = ReportInfo::ALL_REPORTS) : CustomForm{
 
-    /**
-     * @param int $timeFrame
-     * @param int $reportType
-     * @return CustomForm
-     */
-    public static function getReportsForm(int $timeFrame = ReportInfo::ALL_TIME, int $reportType = ReportInfo::ALL_REPORTS): CustomForm
-    {
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+			if(PracticeCore::getPlayerHandler()->isPlayer($event))
+				PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
 
-            if (PracticeCore::getPlayerHandler()->isPlayer($event))
-                PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+			if(!is_null($data) and is_array($data)){
 
-            if (!is_null($data) and is_array($data)) {
+				$timeIndex = 0;
+				$typeIndex = 1;
 
-                $timeIndex = 0;
-                $typeIndex = 1;
+				$timeFrame = intval($data[$timeIndex]);
+				$reportType = intval($data[$typeIndex]);
 
-                $timeFrame = intval($data[$timeIndex]);
-                $reportType = intval($data[$typeIndex]);
+				$form = self::getReportsForm($timeFrame, $reportType);
 
-                $form = self::getReportsForm($timeFrame, $reportType);
+				if(PracticeCore::getPlayerHandler()->isPlayer($event)){
+					$p = PracticeCore::getPlayerHandler()->getPlayer($event);
+					$p->sendForm($form);
+				}
+			}
+		});
 
-                if (PracticeCore::getPlayerHandler()->isPlayer($event)) {
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($event);
-                    $p->sendForm($form);
-                }
-            }
-        });
+		$title = 'All %name%';
 
-        $title = 'All %name%';
+		switch($timeFrame){
+			case ReportInfo::LAST_DAY:
+				$title = '%name% from the Past Day';
+				break;
+			case ReportInfo::LAST_HOUR:
+				$title = '%name% from the Past Hour';
+				break;
+			case ReportInfo::LAST_MONTH:
+				$title = '%name% from the Past Month';
+				break;
+		}
 
-        switch ($timeFrame) {
-            case ReportInfo::LAST_DAY:
-                $title = '%name% from the Past Day';
-                break;
-            case ReportInfo::LAST_HOUR:
-                $title = '%name% from the Past Hour';
-                break;
-            case ReportInfo::LAST_MONTH:
-                $title = '%name% from the Past Month';
-                break;
-        }
+		$title = PracticeUtil::str_replace($title, ['%name%' => ReportInfo::getReportName($reportType)]);
 
-        $title = PracticeUtil::str_replace($title, ['%name%' => ReportInfo::getReportName($reportType)]);
+		$form->setTitle($title);
 
-        $form->setTitle($title);
+		$form->addStepSlider('By TimeFrame: ', ['Past-hour', 'Past-day', 'Past-month', 'All-time'], $timeFrame);
 
-        $form->addStepSlider('By TimeFrame: ', array('Past-hour', 'Past-day', 'Past-month', 'All-time'), $timeFrame);
+		$form->addStepSlider('By ReportType: ', [ReportInfo::getReportName(ReportInfo::REPORT_BUG), ReportInfo::getReportName(ReportInfo::REPORT_HACK), ReportInfo::getReportName(ReportInfo::REPORT_STAFF), 'All-Reports'], $reportType);
 
-        $form->addStepSlider('By ReportType: ', array(ReportInfo::getReportName(ReportInfo::REPORT_BUG), ReportInfo::getReportName(ReportInfo::REPORT_HACK), ReportInfo::getReportName(ReportInfo::REPORT_STAFF), 'All-Reports'), $reportType);
+		$reportArray = PracticeCore::getReportHandler()->getReports($timeFrame, $reportType);
 
-        $reportArray = PracticeCore::getReportHandler()->getReports($timeFrame, $reportType);
+		$count = count($reportArray);
 
-        $count = count($reportArray);
+		if($count > 0){
 
-        if ($count > 0) {
+			$form->addLabel('List of Reports:');
 
-            $form->addLabel('List of Reports:');
+			foreach($reportArray as $report){
 
-            foreach ($reportArray as $report) {
+				if($report instanceof AbstractReport){
 
-                if ($report instanceof AbstractReport) {
+					$label = $report->toMessage();
 
-                    $label = $report->toMessage();
+					$form->addLabel($label);
+				}
+			}
+		}else $form->addLabel('There are no reports');
 
-                    $form->addLabel($label);
-                }
-            }
-        } else $form->addLabel('There are no reports');
+		return $form;
+	}
 
-        return $form;
-    }
+	/**
+	 * @param string $player
+	 *
+	 * @return CustomForm
+	 */
+	public static function getStatsForm(string $player) : CustomForm{
 
-    /**
-     * @param string $player
-     * @return CustomForm
-     */
-    public static function getStatsForm(string $player): CustomForm
-    {
+		$stats = PracticeCore::getPlayerHandler()->getStats($player);
 
-        $stats = PracticeCore::getPlayerHandler()->getStats($player);
+		$form = new CustomForm(function(Player $event){
 
-        $form = new CustomForm(function (Player $event) {
+			if(PracticeCore::getPlayerHandler()->isPlayer($event))
+				PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
 
-            if (PracticeCore::getPlayerHandler()->isPlayer($event))
-                PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+		});
 
-        });
+		$form->setTitle($stats['title']);
 
-        $form->setTitle($stats['title']);
+		$form->addLabel($stats['kills']);
 
-        $form->addLabel($stats['kills']);
+		$form->addLabel($stats['deaths']);
 
-        $form->addLabel($stats['deaths']);
+		$form->addLabel($stats['elo']);
 
-        $form->addLabel($stats['elo']);
+		return $form;
+	}
 
-        return $form;
-    }
+	/**
+	 * @param string $player
+	 * @param bool   $op
+	 *
+	 * @return CustomForm
+	 */
+	public static function getSettingsForm(string $player, bool $op = false) : CustomForm{
 
-    /**
-     * @param string $player
-     * @param bool $op
-     * @return CustomForm
-     */
-    public static function getSettingsForm(string $player, bool $op = false): CustomForm
-    {
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+			if(PracticeCore::getPlayerHandler()->isPlayer($event))
+				PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
 
-            if (PracticeCore::getPlayerHandler()->isPlayer($event))
-                PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+			if(!is_null($data) and is_array($data)){
 
-            if (!is_null($data) and is_array($data)) {
+				$dataSBIndex = 0;
 
-                $dataSBIndex = 0;
+				$resultSB = boolval($data[$dataSBIndex]);
 
-                $resultSB = boolval($data[$dataSBIndex]);
+				if(PracticeCore::getPlayerHandler()->isPlayerOnline($event)){
 
-                if (PracticeCore::getPlayerHandler()->isPlayerOnline($event)) {
+					$p = PracticeCore::getPlayerHandler()->getPlayer($event);
 
-                    $p = PracticeCore::getPlayerHandler()->getPlayer($event);
+					if($resultSB === true){
 
-                    if ($resultSB === true) {
+						$p->showScoreboard();
 
-                        $p->showScoreboard();
+					}else{
 
-                    } else {
+						$p->hideScoreboard();
+					}
 
-                        $p->hideScoreboard();
-                    }
+					PracticeCore::getPlayerHandler()->enableScoreboard($event->getName(), $resultSB);
 
-                    PracticeCore::getPlayerHandler()->enableScoreboard($event->getName(), $resultSB);
+					$dataPEOnlyIndex = 1;
 
-                    $dataPEOnlyIndex = 1;
+					if(isset($data[$dataPEOnlyIndex])){
 
-                    if (isset($data[$dataPEOnlyIndex])) {
+						$resultPEOnly = boolval($data[$dataPEOnlyIndex]);
 
-                        $resultPEOnly = boolval($data[$dataPEOnlyIndex]);
+						PracticeCore::getPlayerHandler()->setPEOnlySetting($event->getName(), $resultPEOnly);
+					}
 
-                        PracticeCore::getPlayerHandler()->setPEOnlySetting($event->getName(), $resultPEOnly);
-                    }
+					$dataPBIndex = 2;
 
-                    $dataPBIndex = 2;
+					if(isset($data[$dataPBIndex])){
 
-                    if (isset($data[$dataPBIndex])) {
+						$resultPB = boolval($data[$dataPBIndex]);
 
-                        $resultPB = boolval($data[$dataPBIndex]);
+						PracticeCore::getPlayerHandler()->setPlaceNBreak($event->getName(), $resultPB);
 
-                        PracticeCore::getPlayerHandler()->setPlaceNBreak($event->getName(), $resultPB);
+					}
+				}
+			}
+		});
 
-                    }
-                }
-            }
-        });
+		$form->setTitle('Your Settings');
 
-        $form->setTitle('Your Settings');
+		$form->addToggle('Enable Scoreboard', PracticeCore::getPlayerHandler()->isScoreboardEnabled($player));
 
-        $form->addToggle('Enable Scoreboard', PracticeCore::getPlayerHandler()->isScoreboardEnabled($player));
+		$changePEOnlySettings = true;
 
-        $changePEOnlySettings = true;
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)){
+			$p = PracticeCore::getPlayerHandler()->getPlayer($player);
+			$changePEOnlySettings = $p->peOnlyQueue();
+		}
 
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            $changePEOnlySettings = $p->peOnlyQueue();
-        }
+		if($changePEOnlySettings === true) $form->addToggle('Enable PE Only Queues', PracticeCore::getPlayerHandler()->canQueuePEOnly($player));
+		else $form->addLabel('Enable PE Only Queues:' . "\n" . TextFormat::RED . "Windows 10/Controller players can't change this setting.");
 
-        if ($changePEOnlySettings === true) $form->addToggle('Enable PE Only Queues', PracticeCore::getPlayerHandler()->canQueuePEOnly($player));
-        else $form->addLabel('Enable PE Only Queues:' . "\n" . TextFormat::RED . "Windows 10/Controller players can't change this setting.");
+		if($op === true) $form->addToggle('Enable Placing and Breaking Blocks', PracticeCore::getPlayerHandler()->canPlaceNBreak($player));
 
-        if ($op === true) $form->addToggle('Enable Placing and Breaking Blocks', PracticeCore::getPlayerHandler()->canPlaceNBreak($player));
+		return $form;
+	}
 
-        return $form;
-    }
+	/**
+	 * @return CustomForm
+	 */
+	public static function createPartyForm() : CustomForm{
 
-    /**
-     * @return CustomForm
-     */
-    public static function createPartyForm(): CustomForm
-    {
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+			if(PracticeCore::getPlayerHandler()->isPlayerOnline($event))
+				PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
 
-            if (PracticeCore::getPlayerHandler()->isPlayerOnline($event))
-                PracticeCore::getPlayerHandler()->getPlayer($event)->removeForm();
+			if(!is_null($data) and is_array($data)){
 
-            if (!is_null($data) and is_array($data)) {
+				$dataNameIndex = 0;
 
-                $dataNameIndex = 0;
+				$resultName = strval($data[$dataNameIndex]);
 
-                $resultName = strval($data[$dataNameIndex]);
+				PracticeCore::getPartyManager()->createParty($event, $resultName);
+			}
+		});
 
-                PracticeCore::getPartyManager()->createParty($event, $resultName);
-            }
-        });
+		$form->setTitle('Create a Party!');
 
-        $form->setTitle('Create a Party!');
+		$form->addInput('Provide a name for your party:', 'MyParty');
 
-        $form->addInput('Provide a name for your party:', 'MyParty');
+		return $form;
+	}
 
-        return $form;
-    }
+	/**
+	 * @return CustomForm
+	 */
+	public static function getPartySettingsForm() : CustomForm{
 
-    /**
-     * @return CustomForm
-     */
-    public static function getPartySettingsForm(): CustomForm
-    {
+		return new CustomForm(function(Player $event, $data = null){
 
-        return new CustomForm(function (Player $event, $data = null) {
+		});
+	}
 
-        });
-    }
+	/**
+	 * @param string $player
+	 * @param bool   $permBan
+	 *
+	 * @return CustomForm
+	 */
+	public static function getBanForm(string $player, bool $permBan) : CustomForm{
 
-    /**
-     * @param string $player
-     * @param bool $permBan
-     * @return CustomForm
-     */
-    public static function getBanForm(string $player, bool $permBan): CustomForm
-    {
+		$form = new CustomForm(function(Player $event, $data = null){
 
-        $form = new CustomForm(function (Player $event, $data = null) {
+			$playerHandler = PracticeCore::getPlayerHandler();
+			if($playerHandler->isPlayerOnline($event))
 
-            $playerHandler = PracticeCore::getPlayerHandler();
-            if ($playerHandler->isPlayerOnline($event))
+				if(!is_null($data) and is_array($data)){
+					var_dump($data);
+				}
+		});
 
-            if (!is_null($data) and is_array($data)) {
-                var_dump($data);
-            }
-        });
 
+		$form->setTitle('Ban Player: ' . $player);
 
-        $form->setTitle('Ban Player: ' . $player);
+		$form->addInput('Reason for ban: ');
 
-        $form->addInput('Reason for ban: ');
+		if($permBan === false){
 
-        if ($permBan === false) {
+			$numDays = [];
 
-            $numDays = [];
+			for($i = 0; $i < 31; $i++)
+				$numDays[] = $i;
 
-            for ($i = 0; $i < 31; $i++)
-                $numDays[] = $i;
+			$form->addDropdown('# of Days Banned:', $numDays);
 
-            $form->addDropdown('# of Days Banned:', $numDays);
+			$numHrs = [];
 
-            $numHrs = [];
+			for($i = 0; $i < 24; $i++)
+				$numHrs[] = $i;
 
-            for ($i = 0; $i < 24; $i++)
-                $numHrs[] = $i;
+			$form->addDropdown('# of Hours Banned: ', $numHrs);
 
-            $form->addDropdown('# of Hours Banned: ', $numHrs);
+			$numMins = [];
 
-            $numMins = [];
+			for($i = 0; $i < 60; $i++)
+				$numMins[] = $i;
 
-            for ($i = 0; $i < 60; $i++)
-                $numMins[] = $i;
+			$form->addDropdown('# of Mins Banned: ', $numMins);
+		}
 
-            $form->addDropdown('# of Mins Banned: ', $numMins);
-        }
-
-        return $form;
-    }
+		return $form;
+	}
 }

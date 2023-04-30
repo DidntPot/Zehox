@@ -166,7 +166,7 @@ formwindow:
   # Duel Form-Window Message -> must have %ranked% in the message.
   duel:
     # Duel Title Form-Window Message.
-    title: "Select %ranked% Duel SavedKit."
+    title: "Select %ranked% Duel"
     # Duel Subtitle Form-Window Message
     content: "Which kit do you want to duel with."
   # Report Form-Window Message -> must have %player% in the message.

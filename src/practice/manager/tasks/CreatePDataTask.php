@@ -4,147 +4,144 @@ namespace practice\manager\tasks;
 
 use pocketmine\scheduler\AsyncTask;
 
-class CreatePDataTask extends AsyncTask
-{
-    /** @var string */
-    private string $encodedIp;
-    /** @var string */
-    private string $playerName;
+class CreatePDataTask extends AsyncTask{
+	/** @var string */
+	private string $encodedIp;
+	/** @var string */
+	private string $playerName;
 
-    /* @var array */
-    private array $kits;
+	/* @var array */
+	private array $kits;
 
-    /** @var string */
-    private string $path;
-    /** @var string */
-    private string $guestRank;
+	/** @var string */
+	private string $path;
+	/** @var string */
+	private string $guestRank;
 
-    /**
-     * @param string $player
-     * @param string $path
-     * @param string $guestRank
-     * @param string $encodedIp
-     * @param array $kits
-     */
-    public function __construct(string $player, string $path, string $guestRank, string $encodedIp, array $kits)
-    {
-        $this->path = $path . "/$player.yml";
-        $this->playerName = $player;
-        $this->encodedIp = $encodedIp;
-        $this->guestRank = $guestRank;
-        $this->kits = $kits;
-    }
+	/**
+	 * @param string $player
+	 * @param string $path
+	 * @param string $guestRank
+	 * @param string $encodedIp
+	 * @param array  $kits
+	 */
+	public function __construct(string $player, string $path, string $guestRank, string $encodedIp, array $kits){
+		$this->path = $path . "/$player.yml";
+		$this->playerName = $player;
+		$this->encodedIp = $encodedIp;
+		$this->guestRank = $guestRank;
+		$this->kits = $kits;
+	}
 
-    /**
-     * @return void
-     */
-    public function onRun(): void
-    {
-        if (!file_exists($this->path)) {
+	/**
+	 * @return void
+	 */
+	public function onRun() : void{
+		if(!file_exists($this->path)){
 
-            $file = fopen($this->path, 'wb');
+			$file = fopen($this->path, 'wb');
 
-            fclose($file);
+			fclose($file);
 
-            $elo = [];
+			$elo = [];
 
-            $size = count($this->kits);
+			$size = count($this->kits);
 
-            if ($size > 0) {
-                foreach ($this->kits as $kit) {
-                    $name = strval($kit);
-                    $elo[$name] = 1000;
-                }
-            }
+			if($size > 0){
+				foreach($this->kits as $kit){
+					$name = strval($kit);
+					$elo[$name] = 1000;
+				}
+			}
 
-            $data = array(
-                'aliases' => [$this->playerName],
-                'stats' => array(
-                    'kills' => 0,
-                    'deaths' => 0,
-                    'elo' => $elo
-                ),
-                'muted' => false,
-                'ranks' => array(
-                    $this->guestRank
-                ),
-                'scoreboards-enabled' => true,
-                'place-break' => false,
-                'pe-only' => false,
-                'ips' => [$this->encodedIp]
-            );
+			$data = [
+				'aliases' => [$this->playerName],
+				'stats' => [
+					'kills' => 0,
+					'deaths' => 0,
+					'elo' => $elo
+				],
+				'muted' => false,
+				'ranks' => [
+					$this->guestRank
+				],
+				'scoreboards-enabled' => true,
+				'place-break' => false,
+				'pe-only' => false,
+				'ips' => [$this->encodedIp]
+			];
 
-            yaml_emit_file($this->path, $data);
+			yaml_emit_file($this->path, $data);
 
-        } else {
+		}else{
 
-            $data = yaml_parse_file($this->path);
+			$data = yaml_parse_file($this->path);
 
-            $emit = false;
+			$emit = false;
 
-            if (!isset($data['scoreboards-enabled'])) {
-                $data['scoreboards-enabled'] = true;
-                $emit = true;
-            }
+			if(!isset($data['scoreboards-enabled'])){
+				$data['scoreboards-enabled'] = true;
+				$emit = true;
+			}
 
-            if (!isset($data['place-break'])) {
-                $data['place-break'] = false;
-                $emit = true;
-            }
+			if(!isset($data['place-break'])){
+				$data['place-break'] = false;
+				$emit = true;
+			}
 
-            if (!isset($data['pe-only'])) {
-                $data['pe-only'] = false;
-                $emit = true;
-            }
+			if(!isset($data['pe-only'])){
+				$data['pe-only'] = false;
+				$emit = true;
+			}
 
-            if (!isset($data['ips'])) {
-                $data['ips'] = [$this->encodedIp];
-                $emit = true;
-            }
+			if(!isset($data['ips'])){
+				$data['ips'] = [$this->encodedIp];
+				$emit = true;
+			}
 
-            $stats = $data['stats'];
+			$stats = $data['stats'];
 
-            $elo = $stats['elo'];
+			$elo = $stats['elo'];
 
-            $keys = array_keys($elo);
+			$keys = array_keys($elo);
 
-            sort($keys);
+			sort($keys);
 
-            $kits = $this->kits;
+			$kits = $this->kits;
 
-            sort($kits);
+			sort($kits);
 
-            if ($keys !== $kits) {
+			if($keys !== $kits){
 
-                $difference = array_diff($kits, $keys);
+				$difference = array_diff($kits, $keys);
 
-                foreach ($difference as $kit) {
+				foreach($difference as $kit){
 
-                    if ($this->isDuelKit($kit))
-                        $elo[$kit] = 1000;
-                    else {
-                        if (isset($elo[$kit]))
-                            unset($elo[$kit]);
-                    }
-                }
+					if($this->isDuelKit($kit))
+						$elo[$kit] = 1000;
+					else{
+						if(isset($elo[$kit]))
+							unset($elo[$kit]);
+					}
+				}
 
-                $stats['elo'] = $elo;
+				$stats['elo'] = $elo;
 
-                $data['stats'] = $stats;
+				$data['stats'] = $stats;
 
-                $emit = true;
-            }
+				$emit = true;
+			}
 
-            if ($emit === true) yaml_emit_file($this->path, $data);
-        }
-    }
+			if($emit === true) yaml_emit_file($this->path, $data);
+		}
+	}
 
-    /**
-     * @param string $kit
-     * @return bool
-     */
-    private function isDuelKit(string $kit): bool
-    {
-        return in_array($kit, $this->kits, FALSE);
-    }
+	/**
+	 * @param string $kit
+	 *
+	 * @return bool
+	 */
+	private function isDuelKit(string $kit) : bool{
+		return in_array($kit, $this->kits, false);
+	}
 }

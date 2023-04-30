@@ -9,29 +9,28 @@ use practice\game\items\PracticeItem;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
-class LeaderboardMenu
-{
-    /**
-     * @param Player $player
-     * @return void
-     */
-    public static function showMenu(Player $player)
-    {
-        $menu = InvMenu::create(InvMenuTypeIds::TYPE_CHEST);
+class LeaderboardMenu{
+	/**
+	 * @param Player $player
+	 *
+	 * @return void
+	 */
+	public static function showMenu(Player $player){
+		$menu = InvMenu::create(InvMenuTypeIds::TYPE_CHEST);
 
-        $menu->setName(PracticeUtil::getName('title-leaderboard-inv'));
-        $menu->setListener(InvMenu::readonly());
+		$menu->setName(PracticeUtil::getName('title-leaderboard-inv'));
+		$menu->setListener(InvMenu::readonly());
 
-        $items = PracticeCore::getItemHandler()->getLeaderboardItems();
+		$items = PracticeCore::getItemHandler()->getLeaderboardItems();
 
-        foreach ($items as $item) {
-            if ($item instanceof PracticeItem) {
-                $slot = $item->getSlot();
-                $i = $item->getItem();
-                $menu->getInventory()->setItem($slot, $i);
-            }
-        }
+		foreach($items as $item){
+			if($item instanceof PracticeItem){
+				$slot = $item->getSlot();
+				$i = $item->getItem();
+				$menu->getInventory()->setItem($slot, $i);
+			}
+		}
 
-        $menu->send($player);
-    }
+		$menu->send($player);
+	}
 }

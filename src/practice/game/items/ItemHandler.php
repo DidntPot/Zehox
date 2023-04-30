@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace practice\game\items;
 
 use JetBrains\PhpStorm\Pure;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\data\bedrock\LegacyItemIdToStringIdMap;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIds;
@@ -16,675 +17,659 @@ use practice\player\PracticePlayer;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
-class ItemHandler
-{
-    /* @var PracticeItem[] */
-    private array $itemList;
-
-    /* @var int */
-    private int $hubItemsCount;
-
-    /* @var int */
-    private int $duelItemsCount;
-
-    /* @var int */
-    private int $ffaItemsCount;
-
-    /* @var int */
-    private int $leaderboardItemsCount;
-
-    /* @var int */
-    private int $partyItemsCount;
-
-    /* @var ItemTextures */
-    private ItemTextures $textures;
-
-    /** @var string[] */
-    private array $potions;
-    /** @var string[] */
-    private array $buckets;
-
-    /**
-     * @param PracticeCore $core
-     */
-    public function __construct(PracticeCore $core)
-    {
-        $this->itemList = [];
-        $this->textures = new ItemTextures($core);
-
-        $this->potions = [
-            'Water Bottle', 'Water Bottle', 'Water Bottle', 'Water Bottle', 'Water Bottle',
-            'Potion of Night Vision', 'Potion of Night Vision', 'Potion of Invisibility',
-            'Potion of Invisibility', 'Potion of Leaping', 'Potion of Leaping', 'Potion of Leaping',
-            'Potion of Fire Resistance', 'Potion of Fire Resistance', 'Potion of Swiftness', 'Potion of Swiftness',
-            'Potion of Swiftness', 'Potion of Slowness', 'Potion of Slowness', 'Potion of Water Breathing',
-            'Potion of Water Breathing', 'Potion of Healing', 'Potion of Healing', 'Potion of Harming',
-            'Potion of Harming', 'Potion of Poison', 'Potion of Poison', 'Potion of Regeneration', 'Potion of Regeneration',
-            'Potion of Regeneration', 'Potion of Strength', 'Potion of Strength', 'Potion of Strength', 'Potion of Weakness',
-            'Potion of Weakness', 'Potion of Decay'
-        ];
-
-        $this->buckets = [
-            8 => 'Water Bucket',
-            9 => 'Water Bucket',
-            10 => 'Lava Bucket',
-            11 => 'Lava Bucket'
-        ];
-
-        $this->init();
-    }
-
-    /**
-     * @return void
-     */
-    private function init(): void
-    {
-        $this->initHubItems();
-        $this->initDuelItems();
-        $this->initFFAItems();
-        $this->initLeaderboardItems();
-        $this->initPartyItems();
-        $this->initMiscItems();
-    }
-
-    /**
-     * @return void
-     */
-    private function initHubItems(): void
-    {
-        $unranked = new PracticeItem('hub.unranked-duels', 0, VanillaItems::IRON_SWORD()->setCustomName(PracticeUtil::getName('unranked-duels')), 'Iron Sword');
-        $ranked = new PracticeItem('hub.ranked-duels', 1, VanillaItems::DIAMOND_SWORD()->setCustomName(PracticeUtil::getName('ranked-duels')), 'Diamond Sword');
-        $ffa = new PracticeItem('hub.ffa', 2, VanillaItems::IRON_AXE()->setCustomName(PracticeUtil::getName('play-ffa')), 'Iron Axe');
-        $leaderboard = new PracticeItem('hub.leaderboard', 4, VanillaItems::SKELETON_SKULL()->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Leaderboards ' . TextFormat::BLUE . '«'), 'Steve Head');
-        $settings = new PracticeItem('hub.settings', 7, VanillaItems::CLOCK()->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GOLD . 'Your Settings ' . TextFormat::BLUE . '«'), 'Clock');
-        $inv = new PracticeItem('hub.duel-inv', 8, LegacyItemIdToStringIdMap::getInstance()->get(54)->setCustomName(PracticeUtil::getName('duel-inventory')), 'Chest');
-
-        $this->itemList = [$unranked, $ranked, $ffa, $leaderboard, $settings, $inv];
-
-        $this->hubItemsCount = 6;
-    }
-
-    /**
-     * @return void
-     */
-    private function initDuelItems(): void
-    {
-        $duelKits = PracticeCore::getKitHandler()->getDuelKits();
-        $items = [];
-        foreach ($duelKits as $kit) {
-            $name = $kit->getName();
-            if ($kit->hasRepItem()) $items['duels.' . $name] = $kit->getRepItem();
-        }
-
-        $count = 0;
+class ItemHandler{
+	/* @var PracticeItem[] */
+	private array $itemList;
+
+	/* @var int */
+	private int $hubItemsCount;
+
+	/* @var int */
+	private int $duelItemsCount;
+
+	/* @var int */
+	private int $ffaItemsCount;
+
+	/* @var int */
+	private int $leaderboardItemsCount;
+
+	/* @var int */
+	private int $partyItemsCount;
+
+	/* @var ItemTextures */
+	private ItemTextures $textures;
+
+	/** @var string[] */
+	private array $potions;
+	/** @var string[] */
+	private array $buckets;
+
+	/**
+	 * @param PracticeCore $core
+	 */
+	public function __construct(PracticeCore $core){
+		$this->itemList = [];
+		$this->textures = new ItemTextures($core);
+
+		$this->potions = [
+			'Water Bottle', 'Water Bottle', 'Water Bottle', 'Water Bottle', 'Water Bottle',
+			'Potion of Night Vision', 'Potion of Night Vision', 'Potion of Invisibility',
+			'Potion of Invisibility', 'Potion of Leaping', 'Potion of Leaping', 'Potion of Leaping',
+			'Potion of Fire Resistance', 'Potion of Fire Resistance', 'Potion of Swiftness', 'Potion of Swiftness',
+			'Potion of Swiftness', 'Potion of Slowness', 'Potion of Slowness', 'Potion of Water Breathing',
+			'Potion of Water Breathing', 'Potion of Healing', 'Potion of Healing', 'Potion of Harming',
+			'Potion of Harming', 'Potion of Poison', 'Potion of Poison', 'Potion of Regeneration', 'Potion of Regeneration',
+			'Potion of Regeneration', 'Potion of Strength', 'Potion of Strength', 'Potion of Strength', 'Potion of Weakness',
+			'Potion of Weakness', 'Potion of Decay'
+		];
+
+		$this->buckets = [
+			8 => 'Water Bucket',
+			9 => 'Water Bucket',
+			10 => 'Lava Bucket',
+			11 => 'Lava Bucket'
+		];
+
+		$this->init();
+	}
+
+	/**
+	 * @return void
+	 */
+	private function init() : void{
+		$this->initHubItems();
+		$this->initDuelItems();
+		$this->initFFAItems();
+		$this->initLeaderboardItems();
+		$this->initPartyItems();
+		$this->initMiscItems();
+	}
+
+	/**
+	 * @return void
+	 */
+	private function initHubItems() : void{
+		$unranked = new PracticeItem('hub.unranked-duels', 0, VanillaItems::IRON_SWORD()->setCustomName(PracticeUtil::getName('unranked-duels')), 'Iron Sword');
+		$ranked = new PracticeItem('hub.ranked-duels', 1, VanillaItems::DIAMOND_SWORD()->setCustomName(PracticeUtil::getName('ranked-duels')), 'Diamond Sword');
+		$ffa = new PracticeItem('hub.ffa', 2, VanillaItems::IRON_AXE()->setCustomName(PracticeUtil::getName('play-ffa')), 'Iron Axe');
+		$leaderboard = new PracticeItem('hub.leaderboard', 4, VanillaItems::SKELETON_SKULL()->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Leaderboards ' . TextFormat::BLUE . '«'), 'Steve Head');
+		$settings = new PracticeItem('hub.settings', 7, VanillaItems::CLOCK()->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GOLD . 'Your Settings ' . TextFormat::BLUE . '«'), 'Clock');
+		$inv = new PracticeItem('hub.duel-inv', 8, VanillaBlocks::CHEST()->asItem()->setCustomName(PracticeUtil::getName('duel-inventory')), 'Chest');
+
+		$this->itemList = [$unranked, $ranked, $ffa, $leaderboard, $settings, $inv];
 
-        $keys = array_keys($items);
+		$this->hubItemsCount = 6;
+	}
 
-        foreach ($keys as $localName) {
+	/**
+	 * @return void
+	 */
+	private function initDuelItems() : void{
+		$duelKits = PracticeCore::getKitHandler()->getDuelKits();
+		$items = [];
+		foreach($duelKits as $kit){
+			$name = $kit->getName();
+			if($kit->hasRepItem()) $items['duels.' . $name] = $kit->getRepItem();
+		}
 
-            $i = $items[$localName];
+		$count = 0;
 
-            if ($i instanceof Item)
-                $this->itemList[] = new PracticeItem(strval($localName), $count, $i, $this->getTextureOf($i));
+		$keys = array_keys($items);
+
+		foreach($keys as $localName){
 
-            $count++;
-        }
+			$i = $items[$localName];
 
-        $this->duelItemsCount = $count;
-    }
+			if($i instanceof Item)
+				$this->itemList[] = new PracticeItem(strval($localName), $count, $i, $this->getTextureOf($i));
 
-    /**
-     * @param Item $item
-     * @return string
-     */
-    private function getTextureOf(Item $item): string
-    {
-        $i = clone $item;
+			$count++;
+		}
 
-        $name = $i->getVanillaName();
+		$this->duelItemsCount = $count;
+	}
 
-        if ($i->getId() === ItemIds::POTION) {
-            $meta = $i->getMeta();
-            $name = $this->potions[$meta];
-        } elseif ($i->getMeta() === ItemIds::SPLASH_POTION) {
-            $meta = $i->getMeta();
-            $name = 'Splash ' . $this->potions[$meta];
-        } elseif ($i->getId() === ItemIds::BUCKET) {
-            $meta = $i->getMeta();
-            if (isset($this->buckets[$meta]))
-                $name = $this->buckets[$meta];
-        }
+	/**
+	 * @param Item $item
+	 *
+	 * @return string
+	 */
+	private function getTextureOf(Item $item) : string{
+		$i = clone $item;
 
-        return $this->textures->getTexture($name);
-    }
+		$name = $i->getVanillaName();
 
-    /**
-     * @return void
-     */
-    private function initFFAItems(): void
-    {
-        $arenas = PracticeCore::getKitHandler()->getFFAArenasWKits();
+		if($i->getId() === ItemIds::POTION){
+			$meta = $i->getMeta();
+			$name = $this->potions[$meta];
+		}elseif($i->getMeta() === ItemIds::SPLASH_POTION){
+			$meta = $i->getMeta();
+			$name = 'Splash ' . $this->potions[$meta];
+		}elseif($i->getId() === ItemIds::BUCKET){
+			$meta = $i->getMeta();
+			if(isset($this->buckets[$meta]))
+				$name = $this->buckets[$meta];
+		}
 
-        $result = [];
+		return $this->textures->getTexture($name);
+	}
 
-        foreach ($arenas as $arena) {
+	/**
+	 * @return void
+	 */
+	private function initFFAItems() : void{
+		$arenas = PracticeCore::getKitHandler()->getFFAArenasWKits();
 
-            if ($arena instanceof FFAArena) {
+		$result = [];
 
-                $kit = $arena->getFirstKit();
+		foreach($arenas as $arena){
 
-                if ($kit->hasRepItem()) {
+			if($arena instanceof FFAArena){
 
-                    $arenaName = $arena->getName();
+				$kit = $arena->getFirstKit();
 
-                    $name = PracticeUtil::getName('ffa-name');
+				if($kit->hasRepItem()){
 
-                    if (PracticeUtil::str_contains(' FFA', $arenaName) and PracticeUtil::str_contains(' FFA', $name))
-                        $name = PracticeUtil::str_replace($name, [' FFA' => '']);
+					$arenaName = $arena->getName();
 
-                    $name = PracticeUtil::str_replace($name, ['%kit-name%' => $arenaName]);
+					$name = PracticeUtil::getName('ffa-name');
 
-                    $item = clone $kit->getRepItem();
+					if(PracticeUtil::str_contains(' FFA', $arenaName) and PracticeUtil::str_contains(' FFA', $name))
+						$name = PracticeUtil::str_replace($name, [' FFA' => '']);
 
-                    $result['ffa.' . $arena->getLocalizedName()] = $item->setCustomName($name);
-                }
-            }
-        }
+					$name = PracticeUtil::str_replace($name, ['%kit-name%' => $arenaName]);
 
-        $count = 0;
+					$item = clone $kit->getRepItem();
 
-        $keys = array_keys($result);
+					$result['ffa.' . $arena->getLocalizedName()] = $item->setCustomName($name);
+				}
+			}
+		}
 
-        foreach ($keys as $key) {
+		$count = 0;
 
-            $item = $result[$key];
+		$keys = array_keys($result);
 
-            if ($item instanceof Item)
-                $this->itemList[] = new PracticeItem(strval($key), $count, $item, $this->getTextureOf($item));
+		foreach($keys as $key){
 
-            $count++;
-        }
+			$item = $result[$key];
 
-        $this->ffaItemsCount = $count;
-    }
+			if($item instanceof Item)
+				$this->itemList[] = new PracticeItem(strval($key), $count, $item, $this->getTextureOf($item));
 
-    /**
-     * @return void
-     */
-    private function initLeaderboardItems(): void
-    {
-        $duelKits = PracticeCore::getKitHandler()->getDuelKits();
+			$count++;
+		}
 
-        $items = [];
+		$this->ffaItemsCount = $count;
+	}
 
-        foreach ($duelKits as $kit) {
-            $name = $kit->getName();
-            if ($kit->hasRepItem()) $items['leaderboard.' . $name] = $kit->getRepItem();
-        }
+	/**
+	 * @return void
+	 */
+	private function initLeaderboardItems() : void{
+		$duelKits = PracticeCore::getKitHandler()->getDuelKits();
 
-        $count = 0;
+		$items = [];
 
-        $keys = array_keys($items);
+		foreach($duelKits as $kit){
+			$name = $kit->getName();
+			if($kit->hasRepItem()) $items['leaderboard.' . $name] = $kit->getRepItem();
+		}
 
-        foreach ($keys as $localName) {
+		$count = 0;
 
-            $i = $items[$localName];
+		$keys = array_keys($items);
 
-            if ($i instanceof Item)
-                $this->itemList[] = new PracticeItem(strval($localName), $count, $i, $this->getTextureOf($i));
+		foreach($keys as $localName){
 
-            $count++;
-        }
+			$i = $items[$localName];
 
-        $globalItem = VanillaItems::COMPASS()->setCustomName(TextFormat::RED . 'Global');
+			if($i instanceof Item)
+				$this->itemList[] = new PracticeItem(strval($localName), $count, $i, $this->getTextureOf($i));
 
-        $var = 'leaderboard.global';
+			$count++;
+		}
 
-        $global = new PracticeItem($var, $count, $globalItem, $this->getTextureOf($globalItem));
+		$globalItem = VanillaItems::COMPASS()->setCustomName(TextFormat::RED . 'Global');
 
-        $this->itemList[] = $global;
+		$var = 'leaderboard.global';
 
-        $this->leaderboardItemsCount = $count + 2;
-    }
+		$global = new PracticeItem($var, $count, $globalItem, $this->getTextureOf($globalItem));
 
-    /**
-     * @return void
-     */
-    private function initPartyItems(): void
-    {
-        $settings = new PracticeItem('party.leader.settings', 0, VanillaItems::COMPASS()->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Party ' . TextFormat::GRAY . 'Settings ' . TextFormat::BLUE . '«'), $this->getTextureOf(VanillaItems::COMPASS()));
-        $match = new PracticeItem('party.leader.match', 1, VanillaItems::IRON_SWORD()->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::AQUA . 'Start a Match' . TextFormat::BLUE . ' «'), $this->getTextureOf(VanillaItems::IRON_SWORD()));
-        $queue = new PracticeItem('party.leader.queue', 2, VanillaItems::GOLDEN_SWORD()->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::GOLD . 'Duel Other Parties ' . TextFormat::BLUE . '«'), $this->getTextureOf(VanillaItems::GOLDEN_SWORD()));
+		$this->itemList[] = $global;
 
-        $leaveParty = new PracticeItem('party.general.leave', 8, VanillaItems::REDSTONE_DUST()->setCustomName(TextFormat::GRAY . '» ' . TextFormat::RED . 'Leave Party ' . TextFormat::GRAY . '«'), $this->getTextureOf(VanillaItems::REDSTONE_DUST()));
+		$this->leaderboardItemsCount = $count + 2;
+	}
 
-        $this->itemList = array_merge($this->itemList, [$settings, $queue, $match, $leaveParty]);
+	/**
+	 * @return void
+	 */
+	private function initPartyItems() : void{
+		$settings = new PracticeItem('party.leader.settings', 0, VanillaItems::COMPASS()->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Party ' . TextFormat::GRAY . 'Settings ' . TextFormat::BLUE . '«'), $this->getTextureOf(VanillaItems::COMPASS()));
+		$match = new PracticeItem('party.leader.match', 1, VanillaItems::IRON_SWORD()->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::AQUA . 'Start a Match' . TextFormat::BLUE . ' «'), $this->getTextureOf(VanillaItems::IRON_SWORD()));
+		$queue = new PracticeItem('party.leader.queue', 2, VanillaItems::GOLDEN_SWORD()->setCustomName(TextFormat::BOLD . TextFormat::BLUE . '» ' . TextFormat::GOLD . 'Duel Other Parties ' . TextFormat::BLUE . '«'), $this->getTextureOf(VanillaItems::GOLDEN_SWORD()));
 
-        $this->partyItemsCount = 4;
-    }
+		$leaveParty = new PracticeItem('party.general.leave', 8, VanillaItems::REDSTONE_DUST()->setCustomName(TextFormat::GRAY . '» ' . TextFormat::RED . 'Leave Party ' . TextFormat::GRAY . '«'), $this->getTextureOf(VanillaItems::REDSTONE_DUST()));
 
-    /**
-     * @return void
-     */
-    private function initMiscItems(): void
-    {
-        $exit_queue = new PracticeItem('exit.queue', 8, VanillaItems::REDSTONE_DUST()->setCustomName(PracticeUtil::getName('leave-queue')), $this->getTextureOf(VanillaItems::REDSTONE_DUST()));
-        $exit_spec = new PracticeItem('exit.spectator', 8, VanillaItems::GREEN_DYE()->setCustomName(PracticeUtil::getName('spec-hub')), $this->getTextureOf(VanillaItems::GREEN_DYE()), false);
-        $exit_inv = new PracticeItem('exit.inventory', 8, VanillaItems::GREEN_DYE()->setCustomName(TextFormat::RED . 'Exit'), $this->getTextureOf((VanillaItems::GREEN_DYE())));
+		$this->itemList = array_merge($this->itemList, [$settings, $queue, $match, $leaveParty]);
 
-        array_push($this->itemList, $exit_queue, $exit_spec, $exit_inv);
-    }
+		$this->partyItemsCount = 4;
+	}
 
-    /**
-     * @return void
-     */
-    public function reload(): void
-    {
-        $this->itemList = [];
-        $this->init();
-    }
+	/**
+	 * @return void
+	 */
+	private function initMiscItems() : void{
+		$exit_queue = new PracticeItem('exit.queue', 8, VanillaItems::REDSTONE_DUST()->setCustomName(PracticeUtil::getName('leave-queue')), $this->getTextureOf(VanillaItems::REDSTONE_DUST()));
+		$exit_spec = new PracticeItem('exit.spectator', 8, VanillaItems::GREEN_DYE()->setCustomName(PracticeUtil::getName('spec-hub')), $this->getTextureOf(VanillaItems::GREEN_DYE()), false);
+		$exit_inv = new PracticeItem('exit.inventory', 8, VanillaItems::GREEN_DYE()->setCustomName(TextFormat::RED . 'Exit'), $this->getTextureOf((VanillaItems::GREEN_DYE())));
 
-    /**
-     * @param $player
-     * @param bool $clear
-     * @return void
-     */
-    public function spawnHubItems($player, bool $clear = false): void
-    {
-        $practicePlayer = null;
+		array_push($this->itemList, $exit_queue, $exit_spec, $exit_inv);
+	}
 
-        if ($player instanceof PracticePlayer)
-            $practicePlayer = $player;
-        else if (PracticeCore::getPlayerHandler()->isPlayerOnline($player))
-            $practicePlayer = PracticeCore::getPlayerHandler()->getPlayer($player);
+	/**
+	 * @return void
+	 */
+	public function reload() : void{
+		$this->itemList = [];
+		$this->init();
+	}
 
-        if ($practicePlayer !== null and $practicePlayer->isOnline()) {
+	/**
+	 * @param      $player
+	 * @param bool $clear
+	 *
+	 * @return void
+	 */
+	public function spawnHubItems($player, bool $clear = false) : void{
+		$practicePlayer = null;
 
-            $p = $practicePlayer->getPlayer();
+		if($player instanceof PracticePlayer)
+			$practicePlayer = $player;
+		else if(PracticeCore::getPlayerHandler()->isPlayerOnline($player))
+			$practicePlayer = PracticeCore::getPlayerHandler()->getPlayer($player);
 
-            $inventory = $p->getInventory();
+		if($practicePlayer !== null and $practicePlayer->isOnline()){
 
-            if ($clear === true) {
-                $inventory->clearAll();
-                $p->getArmorInventory()->clearAll();
-            }
+			$p = $practicePlayer->getPlayer();
 
-            for ($i = 0; $i < $this->hubItemsCount; $i++) {
+			$inventory = $p->getInventory();
 
-                if (isset($this->itemList[$i])) {
+			if($clear === true){
+				$inventory->clearAll();
+				$p->getArmorInventory()->clearAll();
+			}
 
-                    $practiceItem = $this->itemList[$i];
+			for($i = 0; $i < $this->hubItemsCount; $i++){
 
-                    $localName = $practiceItem->getLocalizedName();
+				if(isset($this->itemList[$i])){
 
-                    if (PracticeUtil::str_contains('hub.', $localName)) {
+					$practiceItem = $this->itemList[$i];
 
-                        $item = $practiceItem->getItem();
-                        $slot = $practiceItem->getSlot();
+					$localName = $practiceItem->getLocalizedName();
 
-                        $exec = true;
+					if(PracticeUtil::str_contains('hub.', $localName)){
 
-                        if (!$practicePlayer->hasInfoOfLastDuel())
-                            $exec = $practiceItem->getLocalizedName() !== 'hub.duel-inv';
+						$item = $practiceItem->getItem();
+						$slot = $practiceItem->getSlot();
 
-                        if ($exec === true) $inventory->setItem($slot, $item);
-                    }
-                }
-            }
-        }
-    }
+						$exec = true;
 
-    /**
-     * @param $player
-     * @return void
-     */
-    public function spawnQueueItems($player): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+						if(!$practicePlayer->hasInfoOfLastDuel())
+							$exec = $practiceItem->getLocalizedName() !== 'hub.duel-inv';
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+						if($exec === true) $inventory->setItem($slot, $item);
+					}
+				}
+			}
+		}
+	}
 
-            $inv = $p->getPlayer()->getInventory();
+	/**
+	 * @param $player
+	 *
+	 * @return void
+	 */
+	public function spawnQueueItems($player) : void{
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)){
 
-            $p->getPlayer()->getArmorInventory()->clearAll();
+			$p = PracticeCore::getPlayerHandler()->getPlayer($player);
 
-            $inv->clearAll();
+			$inv = $p->getPlayer()->getInventory();
 
-            $item = $this->getLeaveQueueItem();
+			$p->getPlayer()->getArmorInventory()->clearAll();
 
-            if ($this->isAPracticeItem($item)) {
+			$inv->clearAll();
 
-                $i = $item->getItem();
+			$item = $this->getLeaveQueueItem();
 
-                $slot = $item->getSlot();
+			if($this->isAPracticeItem($item)){
 
-                $inv->setItem($slot, $i);
-            }
-        }
-    }
+				$i = $item->getItem();
 
-    /**
-     * @return PracticeItem|null
-     */
-    #[Pure] public function getLeaveQueueItem(): ?PracticeItem
-    {
-        return $this->getFromLocalName('exit.queue');
-    }
+				$slot = $item->getSlot();
 
-    /**
-     * @param string $name
-     * @return PracticeItem|null
-     */
-    #[Pure] public function getFromLocalName(string $name): ?PracticeItem
-    {
-        foreach ($this->itemList as $item) {
-            if ($item instanceof PracticeItem) {
-                $localName = $item->getLocalizedName();
-                if ($localName === $name) {
-                    return $item;
-                }
-            }
-        }
-        return null;
-    }
+				$inv->setItem($slot, $i);
+			}
+		}
+	}
 
-    /**
-     * @param $item
-     * @return bool
-     */
-    private function isAPracticeItem($item): bool
-    {
-        return !is_null($item) and $item instanceof PracticeItem;
-    }
-
-    /**
-     * @param $player
-     * @return void
-     */
-    public function spawnSpecItems($player): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-
-            $inv = $p->getPlayer()->getInventory();
-
-            $inv->clearAll();
-
-            $p->getPlayer()->getArmorInventory()->clearAll();
-
-            $item = $this->getExitSpectatorItem();
-
-            if ($this->isAPracticeItem($item)) {
-
-                $i = $item->getItem();
-
-                $slot = $item->getSlot();
-
-                $inv->setItem($slot, $i);
-            }
-        }
-    }
-
-    /**
-     * @return PracticeItem|null
-     */
-    #[Pure] public function getExitSpectatorItem(): ?PracticeItem
-    {
-        return $this->getFromLocalName('exit.spectator');
-    }
-
-    /**
-     * @param PracticePlayer $player
-     * @param PracticeItem $item
-     * @return bool
-     */
-    public function canUseItem(PracticePlayer $player, PracticeItem $item): bool
-    {
-        $result = true;
-        if (!is_null($player) and $player->isOnline()) {
-            $p = $player->getPlayer();
-            $level = $p->getWorld();
-            if ($item->canOnlyUseInLobby()) {
-                if (!PracticeUtil::areWorldEqual($level, PracticeUtil::getDefaultWorld())) {
-                    $result = false;
-                }
-            }
-        } else {
-            $result = false;
-        }
-        return $result;
-    }
-
-    /**
-     * @param Item $item
-     * @return PracticeItem|null
-     */
-    public function getPracticeItem(Item $item): ?PracticeItem
-    {
-        $result = null;
-        if ($this->isPracticeItem($item)) {
-            $practiceItem = $this->itemList[$this->indexOf($item)];
-            if ($practiceItem instanceof PracticeItem) {
-                $result = $practiceItem;
-            }
-        }
-        return $result;
-    }
+	/**
+	 * @return PracticeItem|null
+	 */
+	#[Pure] public function getLeaveQueueItem() : ?PracticeItem{
+		return $this->getFromLocalName('exit.queue');
+	}
 
-    /**
-     * @param Item $item
-     * @return bool
-     */
-    public function isPracticeItem(Item $item): bool
-    {
-        return $this->indexOf($item) !== -1;
-    }
+	/**
+	 * @param string $name
+	 *
+	 * @return PracticeItem|null
+	 */
+	#[Pure] public function getFromLocalName(string $name) : ?PracticeItem{
+		foreach($this->itemList as $item){
+			if($item instanceof PracticeItem){
+				$localName = $item->getLocalizedName();
+				if($localName === $name){
+					return $item;
+				}
+			}
+		}
+		return null;
+	}
 
-    /**
-     * @param Item $item
-     * @return int
-     */
-    private function indexOf(Item $item): int
-    {
-        $result = -1;
-        $count = 0;
-        foreach ($this->itemList as $i) {
-            $practiceItem = $i->getItem();
-            if ($this->itemsEqual($practiceItem, $item)) {
-                $result = $count;
-                break;
-            }
-            $count++;
-        }
-        return $result;
-    }
+	/**
+	 * @param $item
+	 *
+	 * @return bool
+	 */
+	private function isAPracticeItem($item) : bool{
+		return !is_null($item) and $item instanceof PracticeItem;
+	}
+
+	/**
+	 * @param $player
+	 *
+	 * @return void
+	 */
+	public function spawnSpecItems($player) : void{
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)){
+
+			$p = PracticeCore::getPlayerHandler()->getPlayer($player);
+
+			$inv = $p->getPlayer()->getInventory();
+
+			$inv->clearAll();
+
+			$p->getPlayer()->getArmorInventory()->clearAll();
+
+			$item = $this->getExitSpectatorItem();
+
+			if($this->isAPracticeItem($item)){
+
+				$i = $item->getItem();
+
+				$slot = $item->getSlot();
+
+				$inv->setItem($slot, $i);
+			}
+		}
+	}
+
+	/**
+	 * @return PracticeItem|null
+	 */
+	#[Pure] public function getExitSpectatorItem() : ?PracticeItem{
+		return $this->getFromLocalName('exit.spectator');
+	}
+
+	/**
+	 * @param PracticePlayer $player
+	 * @param PracticeItem   $item
+	 *
+	 * @return bool
+	 */
+	public function canUseItem(PracticePlayer $player, PracticeItem $item) : bool{
+		$result = true;
+		if(!is_null($player) and $player->isOnline()){
+			$p = $player->getPlayer();
+			$level = $p->getWorld();
+			if($item->canOnlyUseInLobby()){
+				if(!PracticeUtil::areWorldEqual($level, PracticeUtil::getDefaultWorld())){
+					$result = false;
+				}
+			}
+		}else{
+			$result = false;
+		}
+		return $result;
+	}
 
-    /**
-     * @param Item $item
-     * @param Item $item1
-     * @return bool
-     */
-    private function itemsEqual(Item $item, Item $item1): bool
-    {
-        return $item->equals($item1, true, false) and $item->getName() === $item1->getName();
-    }
+	/**
+	 * @param Item $item
+	 *
+	 * @return PracticeItem|null
+	 */
+	public function getPracticeItem(Item $item) : ?PracticeItem{
+		$result = null;
+		if($this->isPracticeItem($item)){
+			$practiceItem = $this->itemList[$this->indexOf($item)];
+			if($practiceItem instanceof PracticeItem){
+				$result = $practiceItem;
+			}
+		}
+		return $result;
+	}
 
-    /**
-     * @return PracticeItem|null
-     */
-    #[Pure] public function getExitInventoryItem(): ?PracticeItem
-    {
-        return $this->getFromLocalName('exit.inventory');
-    }
+	/**
+	 * @param Item $item
+	 *
+	 * @return bool
+	 */
+	public function isPracticeItem(Item $item) : bool{
+		return $this->indexOf($item) !== -1;
+	}
 
-    /**
-     * @return PracticeItem[]
-     */
-    #[Pure] public function getDuelItems(): array
-    {
-        $result = [];
+	/**
+	 * @param Item $item
+	 *
+	 * @return int
+	 */
+	private function indexOf(Item $item) : int{
+		$result = -1;
+		$count = 0;
+		foreach($this->itemList as $i){
+			$practiceItem = $i->getItem();
+			if($this->itemsEqual($practiceItem, $item)){
+				$result = $count;
+				break;
+			}
+			$count++;
+		}
+		return $result;
+	}
 
-        $start = $this->hubItemsCount;
+	/**
+	 * @param Item $item
+	 * @param Item $item1
+	 *
+	 * @return bool
+	 */
+	private function itemsEqual(Item $item, Item $item1) : bool{
+		return $item->equals($item1, true, false) and $item->getName() === $item1->getName();
+	}
 
-        $size = $start + $this->duelItemsCount;
+	/**
+	 * @return PracticeItem|null
+	 */
+	#[Pure] public function getExitInventoryItem() : ?PracticeItem{
+		return $this->getFromLocalName('exit.inventory');
+	}
 
-        for ($i = $start; $i < $size; $i++) {
+	/**
+	 * @return PracticeItem[]
+	 */
+	#[Pure] public function getDuelItems() : array{
+		$result = [];
 
-            if (isset($this->itemList[$i])) {
+		$start = $this->hubItemsCount;
 
-                $item = $this->itemList[$i];
+		$size = $start + $this->duelItemsCount;
 
-                $localName = $item->getLocalizedName();
+		for($i = $start; $i < $size; $i++){
 
-                if (PracticeUtil::str_contains('duels.', $localName))
+			if(isset($this->itemList[$i])){
 
-                    $result[] = $item;
+				$item = $this->itemList[$i];
 
-            }
-        }
+				$localName = $item->getLocalizedName();
 
-        return $result;
-    }
+				if(PracticeUtil::str_contains('duels.', $localName))
 
-    /**
-     * @return array
-     */
-    public function getLeaderboardItems(): array
-    {
-        $result = [];
+					$result[] = $item;
 
-        $size = $this->leaderboardItemsCount;
+			}
+		}
 
-        $start = $this->hubItemsCount + $this->duelItemsCount;
+		return $result;
+	}
 
-        $len = $start + $size;
+	/**
+	 * @return array
+	 */
+	public function getLeaderboardItems() : array{
+		$result = [];
 
-        $leaderboards = PracticeCore::getPlayerHandler()->getCurrentLeaderboards();
+		$size = $this->leaderboardItemsCount;
 
-        for ($i = $start; $i <= $len; $i++) {
+		$start = $this->hubItemsCount + $this->duelItemsCount;
 
-            if (isset($this->itemList[$i])) {
+		$len = $start + $size;
 
-                $practiceItem = $this->itemList[$i];
+		$leaderboards = PracticeCore::getPlayerHandler()->getCurrentLeaderboards();
 
-                $localName = $practiceItem->getLocalizedName();
+		for($i = $start; $i <= $len; $i++){
 
-                if (PracticeUtil::str_contains('leaderboard.', $localName)) {
+			if(isset($this->itemList[$i])){
 
-                    $name = $practiceItem->getName();
+				$practiceItem = $this->itemList[$i];
 
-                    $uncoloredName = PracticeUtil::getUncoloredString($name);
+				$localName = $practiceItem->getLocalizedName();
 
-                    if (PracticeUtil::equals_string($uncoloredName, 'Global', 'global', 'GLOBAL', 'global '))
-                        $uncoloredName = 'global';
+				if(PracticeUtil::str_contains('leaderboard.', $localName)){
 
-                    $leaderboard = $leaderboards[$uncoloredName];
+					$name = $practiceItem->getName();
 
-                    $item = clone $practiceItem->getItem();
+					$uncoloredName = PracticeUtil::getUncoloredString($name);
 
-                    $item = $item->setLore($leaderboard);
+					if(PracticeUtil::equals_string($uncoloredName, 'Global', 'global', 'GLOBAL', 'global '))
+						$uncoloredName = 'global';
 
-                    $practiceItem = $practiceItem->setItem($item);
+					$leaderboard = $leaderboards[$uncoloredName];
 
-                    $result[] = $practiceItem;
-                }
-            }
-        }
+					$item = clone $practiceItem->getItem();
 
-        return $result;
-    }
+					$item = $item->setLore($leaderboard);
 
-    /**
-     * @return array
-     */
-    #[Pure] public function getFFAItems(): array
-    {
-        $result = [];
+					$practiceItem = $practiceItem->setItem($item);
 
-        $start = $this->hubItemsCount + $this->duelItemsCount;
+					$result[] = $practiceItem;
+				}
+			}
+		}
 
-        $size = $start + $this->hubItemsCount;
+		return $result;
+	}
 
-        for ($i = $start; $i < $size; $i++) {
+	/**
+	 * @return array
+	 */
+	#[Pure] public function getFFAItems() : array{
+		$result = [];
 
-            if (isset($this->itemList[$i])) {
+		$start = $this->hubItemsCount + $this->duelItemsCount;
 
-                $item = $this->itemList[$i];
+		$size = $start + $this->hubItemsCount;
 
-                $localName = $item->getLocalizedName();
+		for($i = $start; $i < $size; $i++){
 
-                if (PracticeUtil::str_contains('ffa.', $localName))
-                    $result[] = $item;
+			if(isset($this->itemList[$i])){
 
-            }
-        }
-        return $result;
-    }
+				$item = $this->itemList[$i];
 
-    /**
-     * @param Player $player
-     * @param int $members
-     * @param bool $leader
-     * @param bool $clearInv
-     * @return void
-     */
-    public function spawnPartyItems(Player $player, int $members, bool $leader = false, bool $clearInv = true): void
-    {
+				$localName = $item->getLocalizedName();
 
-        $start = $this->hubItemsCount + $this->duelItemsCount + $this->leaderboardItemsCount;
+				if(PracticeUtil::str_contains('ffa.', $localName))
+					$result[] = $item;
 
-        $size = $this->partyItemsCount + $start;
+			}
+		}
+		return $result;
+	}
 
-        $numPlayers = $members;
+	/**
+	 * @param Player $player
+	 * @param int    $members
+	 * @param bool   $leader
+	 * @param bool   $clearInv
+	 *
+	 * @return void
+	 */
+	public function spawnPartyItems(Player $player, int $members, bool $leader = false, bool $clearInv = true) : void{
 
-        $inv = $player->getInventory();
-        $armorInv = $player->getArmorInventory();
+		$start = $this->hubItemsCount + $this->duelItemsCount + $this->leaderboardItemsCount;
 
-        if ($clearInv === true) {
-            $inv->clearAll();
-            $armorInv->clearAll();
-        }
+		$size = $this->partyItemsCount + $start;
 
-        for ($i = $start; $i < $size; $i++) {
+		$numPlayers = $members;
 
-            if (isset($this->itemList[$i])) {
+		$inv = $player->getInventory();
+		$armorInv = $player->getArmorInventory();
 
-                $item = $this->itemList[$i];
+		if($clearInv === true){
+			$inv->clearAll();
+			$armorInv->clearAll();
+		}
 
-                $localName = $item->getLocalizedName();
+		for($i = $start; $i < $size; $i++){
 
-                $slot = $item->getSlot();
+			if(isset($this->itemList[$i])){
 
-                if (PracticeUtil::str_contains($localName, 'party.')) {
+				$item = $this->itemList[$i];
 
-                    $exec = !(($leader === false and PracticeUtil::str_contains('leader.', $localName)));
+				$localName = $item->getLocalizedName();
 
-                    if ($exec === true) {
+				$slot = $item->getSlot();
 
-                        $i = clone $item->getItem();
+				if(PracticeUtil::str_contains($localName, 'party.')){
 
-                        if (PracticeUtil::str_contains('.match', $localName)) {
+					$exec = !(($leader === false and PracticeUtil::str_contains('leader.', $localName)));
 
-                            if ($numPlayers < 3) continue;
+					if($exec === true){
 
-                            $n = $numPlayers / 2;
+						$i = clone $item->getItem();
 
-                            $replaced = $n . 'vs' . $n;
+						if(PracticeUtil::str_contains('.match', $localName)){
 
-                            $loreStr = TextFormat::RED . $replaced;
+							if($numPlayers < 3) continue;
 
-                            $i = $i->setLore([$loreStr]);
+							$n = $numPlayers / 2;
 
-                        } elseif (PracticeUtil::str_contains('.queue', $localName)) {
+							$replaced = $n . 'vs' . $n;
 
-                            if ($numPlayers !== 2) continue;
-                        }
+							$loreStr = TextFormat::RED . $replaced;
 
-                        $inv->setItem($slot, $i);
-                    }
-                }
-            }
-        }
-    }
+							$i = $i->setLore([$loreStr]);
+
+						}elseif(PracticeUtil::str_contains('.queue', $localName)){
+
+							if($numPlayers !== 2) continue;
+						}
+
+						$inv->setItem($slot, $i);
+					}
+				}
+			}
+		}
+	}
 }

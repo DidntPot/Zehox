@@ -9,30 +9,29 @@ use practice\game\items\PracticeItem;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
-class DuelMenu
-{
-    /**
-     * @param Player $player
-     * @return void
-     */
-    public static function showMenu(Player $player)
-    {
-        $menu = InvMenu::create(InvMenuTypeIds::TYPE_CHEST);
+class DuelMenu{
+	/**
+	 * @param Player $player
+	 *
+	 * @return void
+	 */
+	public static function showMenu(Player $player){
+		$menu = InvMenu::create(InvMenuTypeIds::TYPE_CHEST);
 
-        $menu->setName(PracticeUtil::getName('title-duel-inventory'));
-        $menu->setListener(InvMenu::readonly());
+		$menu->setName(PracticeUtil::getName('title-duel-inventory'));
+		$menu->setListener(InvMenu::readonly());
 
-        $items = PracticeCore::getItemHandler()->getDuelItems();
+		$items = PracticeCore::getItemHandler()->getDuelItems();
 
-        foreach ($items as $item) {
-            if ($item instanceof PracticeItem) {
-                $slot = $item->getSlot();
-                $i = $item->getItem();
-                $menu->getInventory()->setItem($slot, $i);
-            }
-        }
+		foreach($items as $item){
+			if($item instanceof PracticeItem){
+				$slot = $item->getSlot();
+				$i = $item->getItem();
+				$menu->getInventory()->setItem($slot, $i);
+			}
+		}
 
-        // I'm not fully implementing this.
-        $menu->send($player);
-    }
+		// I'm not fully implementing this.
+		$menu->send($player);
+	}
 }

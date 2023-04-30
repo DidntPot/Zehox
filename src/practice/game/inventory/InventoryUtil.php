@@ -13,84 +13,83 @@ use practice\game\inventory\menus\ResultMenu;
 use practice\PracticeCore;
 use practice\PracticeUtil;
 
-class InventoryUtil
-{
-    /**
-     * @param $player
-     * @return void
-     */
-    public static function sendFFAInv($player): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            FFAMenu::showMenu($p->getPlayer());
-        }
-    }
+class InventoryUtil{
+	/**
+	 * @param $player
+	 *
+	 * @return void
+	 */
+	public static function sendFFAInv($player) : void{
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)){
+			$p = PracticeCore::getPlayerHandler()->getPlayer($player);
+			FFAMenu::showMenu($p->getPlayer());
+		}
+	}
 
-    /**
-     * @param $player
-     * @param bool $ranked
-     * @return void
-     */
-    public static function sendMatchInv($player, bool $ranked = false): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            MatchMenu::showMenu($p->getPlayer(), $ranked);
-        }
-    }
+	/**
+	 * @param      $player
+	 * @param bool $ranked
+	 *
+	 * @return void
+	 */
+	public static function sendMatchInv($player, bool $ranked = false) : void{
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)){
+			$p = PracticeCore::getPlayerHandler()->getPlayer($player);
+			MatchMenu::showMenu($p->getPlayer(), $ranked);
+		}
+	}
 
-    /**
-     * @param $player
-     * @return void
-     */
-    public static function sendDuelInv($player): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            DuelMenu::showMenu($p->getPlayer());
-        }
-    }
+	/**
+	 * @param $player
+	 *
+	 * @return void
+	 */
+	public static function sendDuelInv($player) : void{
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)){
+			$p = PracticeCore::getPlayerHandler()->getPlayer($player);
+			DuelMenu::showMenu($p->getPlayer());
+		}
+	}
 
-    /**
-     * @param $player
-     * @param string $name
-     * @return void
-     */
-    public static function sendResultInv($player, string $name): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
+	/**
+	 * @param        $player
+	 * @param string $name
+	 *
+	 * @return void
+	 */
+	public static function sendResultInv($player, string $name) : void{
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)){
 
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
+			$p = PracticeCore::getPlayerHandler()->getPlayer($player);
 
-            $playerName = $p->getPlayerName();
+			$playerName = $p->getPlayerName();
 
-            $invName = PracticeUtil::getUncoloredString($name);
+			$invName = PracticeUtil::getUncoloredString($name);
 
-            $res = 'opponent';
+			$res = 'opponent';
 
-            if (PracticeUtil::str_contains($invName, $playerName)) $res = 'player';
+			if(PracticeUtil::str_contains($invName, $playerName)) $res = 'player';
 
-            if ($p->hasInfoOfLastDuel()) {
+			if($p->hasInfoOfLastDuel()){
 
-                $lastDuelInfo = $p->getInfoOfLastDuel()[$res];
+				$lastDuelInfo = $p->getInfoOfLastDuel()[$res];
 
-                if ($lastDuelInfo instanceof DuelInvInfo) {
-                    ResultMenu::showMenu($player, $lastDuelInfo);
-                }
-            }
-        }
-    }
+				if($lastDuelInfo instanceof DuelInvInfo){
+					ResultMenu::showMenu($player, $lastDuelInfo);
+				}
+			}
+		}
+	}
 
-    /**
-     * @param $player
-     * @return void
-     */
-    public static function sendLeaderboardInv($player): void
-    {
-        if (PracticeCore::getPlayerHandler()->isPlayerOnline($player)) {
-            $p = PracticeCore::getPlayerHandler()->getPlayer($player);
-            LeaderboardMenu::showMenu($p->getPlayer());
-        }
-    }
+	/**
+	 * @param $player
+	 *
+	 * @return void
+	 */
+	public static function sendLeaderboardInv($player) : void{
+		if(PracticeCore::getPlayerHandler()->isPlayerOnline($player)){
+			$p = PracticeCore::getPlayerHandler()->getPlayer($player);
+			LeaderboardMenu::showMenu($p->getPlayer());
+		}
+	}
 }
