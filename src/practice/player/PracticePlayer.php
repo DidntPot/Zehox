@@ -31,9 +31,9 @@ use practice\scoreboard\ScoreboardUtil;
 
 class PracticePlayer{
 	/** @var int */
-	public const MAX_COMBAT_TICKS = 10;
+	public const int MAX_COMBAT_TICKS = 10;
 	/** @var int */
-	public const MAX_ENDERPEARL_SECONDS = 15;
+	public const int MAX_ENDERPEARL_SECONDS = 15;
 
 	/** @var bool */
 	private bool $inCombat;
@@ -1457,5 +1457,9 @@ class PracticePlayer{
 			$p->getInventory()->clearAll();
 			$p->kick($msg);
 		}
+	}
+
+	public function getPing() : int{
+		return $this->getPlayer()->getNetworkSession()->getPing();
 	}
 }

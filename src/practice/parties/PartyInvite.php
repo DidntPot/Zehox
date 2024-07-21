@@ -9,7 +9,7 @@ use practice\PracticeUtil;
 
 class PartyInvite{
 	/** @var int */
-	private const MAX_INVITE_SECS = 20;
+	private const int MAX_INVITE_SECS = 20;
 	/** @var int */
 	private static int $INVITEIDS = 0;
 

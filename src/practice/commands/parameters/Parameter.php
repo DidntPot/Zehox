@@ -6,20 +6,20 @@ namespace practice\commands\parameters;
 
 interface Parameter{
 	/** @var int */
-	const PARAMTYPE_STRING = 0;
+	const int PARAMTYPE_STRING = 0;
 	/** @var int */
-	const PARAMTYPE_INTEGER = 1;
+	const int PARAMTYPE_INTEGER = 1;
 	/** @var int */
-	const PARAMTYPE_TARGET = 2;
+	const int PARAMTYPE_TARGET = 2;
 	/** @var int */
-	const PARAMTYPE_BOOLEAN = 3;
+	const int PARAMTYPE_BOOLEAN = 3;
 	/** @var int */
-	const PARAMTYPE_FLOAT = 4;
+	const int PARAMTYPE_FLOAT = 4;
 	/** @var int */
-	const PARAMTYPE_ANY = 5;
+	const int PARAMTYPE_ANY = 5;
 
 	/** @var string */
-	const NO_PERMISSION = "none";
+	const string NO_PERMISSION = "none";
 
 	/**
 	 * @return string

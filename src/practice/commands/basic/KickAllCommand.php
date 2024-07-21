@@ -26,7 +26,7 @@ class KickAllCommand extends Command{
 	public function execute(CommandSender $sender, string $commandLabel, array $args) : bool{
 		$msg = null;
 		if(PracticeUtil::canExecBasicCommand($sender)){
-			if(PracticeUtil::testPermission($sender, $this->getPermission())){
+			if(PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 				foreach(Server::getInstance()->getOnlinePlayers() as $player){
 					$exec = true;
 					if($sender instanceof Player){

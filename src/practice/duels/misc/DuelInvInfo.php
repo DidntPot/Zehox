@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace practice\duels\misc;
 
 use JetBrains\PhpStorm\Pure;
+use pocketmine\block\utils\MobHeadType;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\item\Item;
-use pocketmine\item\ItemFactory;
-use pocketmine\item\ItemIds;
+use pocketmine\item\ItemTypeIds;
+use pocketmine\item\PotionType;
 use pocketmine\item\VanillaItems;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -71,8 +73,8 @@ class DuelInvInfo{
 		foreach($itemArr as $item){
 			if($item instanceof Item){
 				$this->items[] = $item;
-				if($this->displayPots() === true and $item->getId() === ItemIds::SPLASH_POTION) $this->potionCount++;
-				elseif($this->displaySoup() === true and $item->getId() === ItemIds::MUSHROOM_STEW) $this->soupCount++;
+				if($this->displayPots() === true and $item->getTypeId() === ItemTypeIds::SPLASH_POTION) $this->potionCount++;
+				elseif($this->displaySoup() === true and $item->getTypeId() === ItemTypeIds::MUSHROOM_STEW) $this->soupCount++;
 			}
 		}
 	}
@@ -123,12 +125,12 @@ class DuelInvInfo{
 	 * @return array
 	 */
 	public function getStatsItems() : array{
-		$head = VanillaItems::ZOMBIE_HEAD()->setCustomName(TextFormat::YELLOW . $this->playerName . TextFormat::RESET);
-		$healthItem = (new ItemFactory)->get(ItemIds::GLISTERING_MELON, 1, PracticeUtil::getProperCount($this->getHealth()))->setCustomName(TextFormat::RED . "$this->health HP");
-		$numHitsItem = (new ItemFactory)->get(ItemIds::PAPER, 0, PracticeUtil::getProperCount($this->getNumHits()))->setCustomName(TextFormat::GOLD . "$this->numHits Hits");
-		$hungerItem = (new ItemFactory)->get(ItemIds::STEAK, 0, PracticeUtil::getProperCount($this->getHunger()))->setCustomName(TextFormat::GREEN . "$this->hunger Hunger-Points");
-		$numPots = (new ItemFactory)->get(ItemIds::SPLASH_POTION, 21, PracticeUtil::getProperCount($this->potionCount))->setCustomName(TextFormat::AQUA . "$this->potionCount Pots");
-		$numSoup = (new ItemFactory)->get(ItemIds::MUSHROOM_STEW, 0, PracticeUtil::getProperCount($this->soupCount))->setCustomName(TextFormat::BLUE . "$this->soupCount Soup");
+		$head = VanillaBlocks::MOB_HEAD()->setMobHeadType(MobHeadType::ZOMBIE)->asItem()->setCustomName(TextFormat::YELLOW . $this->playerName . TextFormat::RESET);
+		$healthItem = VanillaItems::GLISTERING_MELON()->setCount(PracticeUtil::getProperCount($this->getHealth()))->setCustomName(TextFormat::RED . "$this->health HP");
+		$numHitsItem = VanillaItems::PAPER()->setCount(PracticeUtil::getProperCount($this->getNumHits()))->setCustomName(TextFormat::GOLD . "$this->numHits Hits");
+		$hungerItem = VanillaItems::STEAK()->setCount(PracticeUtil::getProperCount($this->getHunger()))->setCustomName(TextFormat::GREEN . "$this->hunger Hunger-Points");
+		$numPots = VanillaItems::SPLASH_POTION()->setType(PotionType::STRONG_HEALING)->setCount(PracticeUtil::getProperCount($this->potionCount))->setCustomName(TextFormat::AQUA . "$this->potionCount Pots");
+		$numSoup = VanillaItems::MUSHROOM_STEW()->setCount(PracticeUtil::getProperCount($this->soupCount))->setCustomName(TextFormat::BLUE . "$this->soupCount Soup");
 
 		$arr = [$head, $healthItem, $hungerItem, $numHitsItem];
 

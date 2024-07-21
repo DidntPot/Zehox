@@ -13,13 +13,13 @@ use practice\PracticeUtil;
 
 abstract class PracticeArena{
 	/** @var string */
-	public const DUEL_ARENA = "arena.duel";
+	public const string DUEL_ARENA = "arena.duel";
 	/** @var string */
-	public const FFA_ARENA = "arena.ffa";
+	public const string FFA_ARENA = "arena.ffa";
 	/** @var string */
-	public const SPLEEF_ARENA = "arena.spleef";
+	public const string SPLEEF_ARENA = "arena.spleef";
 	/** @var string */
-	public const NO_ARENA = "none";
+	public const string NO_ARENA = "none";
 	/** @var World */
 	protected World $world;
 

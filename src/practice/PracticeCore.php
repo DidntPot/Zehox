@@ -192,7 +192,7 @@ class PracticeCore extends PluginBase{
 	 * @return void
 	 */
 	public function onEnable() : void{
-		if(!InvMenuHandler::isRegistered()) {
+		if(!InvMenuHandler::isRegistered()){
 			InvMenuHandler::register($this);
 		}
 
@@ -215,7 +215,7 @@ class PracticeCore extends PluginBase{
 
 		self::$mysqlManager = new MysqlManager($this->getDataFolder());
 
-		if(!PracticeUtil::isMysqlEnabled()) {
+		if(!PracticeUtil::isMysqlEnabled()){
 			self::$playerHandler->updateLeaderboards();
 		}
 
@@ -251,11 +251,11 @@ class PracticeCore extends PluginBase{
 				throw new UnexpectedValueException("No such potion type");
 			}
 			return new SplashPotion(EntityDataHelper::parseLocation($nbt, $world), null, $potionType, $nbt);
-		}, ["ThrownPotion", "minecraft:potion", "thrownpotion"], EntityLegacyIds::SPLASH_POTION);
+		}, ["ThrownPotion", "minecraft:potion", "thrownpotion"]);
 
 		EntityFactory::getInstance()->register(FishingHook::class, function(World $world, CompoundTag $nbt) : FishingHook{
 			return new FishingHook(EntityDataHelper::parseLocation($nbt, $world), null, $nbt);
-		}, ["FishingHook", "minecraft:fishing_hook"], EntityLegacyIds::FISHING_HOOK);
+		}, ["FishingHook", "minecraft:fishing_hook"]);
 	}
 
 	/**

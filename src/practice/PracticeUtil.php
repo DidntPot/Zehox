@@ -8,8 +8,7 @@ use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 use JsonException;
 use pocketmine\block\Block;
-use pocketmine\block\BlockFactory;
-use pocketmine\block\BlockLegacyIds;
+use pocketmine\block\BlockTypeIds;
 use pocketmine\command\CommandSender;
 use pocketmine\data\bedrock\EnchantmentIdMap;
 use pocketmine\entity\Location;
@@ -20,8 +19,8 @@ use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\EnderPearl;
 use pocketmine\item\Item;
-use pocketmine\item\ItemFactory;
-use pocketmine\item\ItemIds;
+use pocketmine\item\ItemTypeIds;
+use pocketmine\item\LegacyStringToItemParser;
 use pocketmine\item\SplashPotion;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
@@ -45,57 +44,47 @@ use practice\scoreboard\ScoreboardUtil;
 
 class PracticeUtil{
 	/** @var int */
-	public const MOBILE_SEPARATOR_LEN = 27;
+	public const int MOBILE_SEPARATOR_LEN = 27;
 	/** @var string */
-	public const WIN10_ADDED_SEPARATOR = '';
+	public const string WIN10_ADDED_SEPARATOR = '';
 	/** @var string */
-	public const PLUGIN_NAME = 'Practice';
+	public const string PLUGIN_NAME = 'Practice';
 
 	/** @var int */
-	public const WINDOWS_10 = 7;
+	public const int WINDOWS_10 = 7;
 	/** @var int */
-	public const IOS = 2;
+	public const int IOS = 2;
 	/** @var int */
-	public const ANDROID = 1;
+	public const int ANDROID = 1;
 	/** @var int */
-	public const WINDOWS_32 = 8;
+	public const int WINDOWS_32 = 8;
 	/** @var int */
-	public const UNKNOWN = -1;
+	public const int UNKNOWN = -1;
 	/** @var int */
-	public const MAC_EDU = 3;
+	public const int MAC_EDU = 3;
 	/** @var int */
-	public const FIRE_EDU = 4;
+	public const int FIRE_EDU = 4;
 	/** @var int */
-	public const GEAR_VR = 5;
+	public const int GEAR_VR = 5;
 	/** @var int */
-	public const HOLOLENS_VR = 6;
+	public const int HOLOLENS_VR = 6;
 	/** @var int */
-	public const DEDICATED = 9;
+	public const int DEDICATED = 9;
 	/** @var int */
-	public const ORBIS = 10;
+	public const int ORBIS = 10;
 	/** @var int */
-	public const NX = 11;
+	public const int NX = 11;
 
 	/** @var int */
-	public const CONTROLS_UNKNOWN = 0;
+	public const int CONTROLS_UNKNOWN = 0;
 	/** @var int */
-	public const CONTROLS_MOUSE = 1;
+	public const int CONTROLS_MOUSE = 1;
 	/** @var int */
-	public const CONTROLS_TOUCH = 2;
+	public const int CONTROLS_TOUCH = 2;
 	/** @var int */
-	public const CONTROLS_CONTROLLER = 3;
+	public const int CONTROLS_CONTROLLER = 3;
 
 	# ITEM FUNCTIONS
-
-	/**
-	 * @param Item $item
-	 * @param bool $testCount
-	 *
-	 * @return bool
-	 */
-	public static function isPotion(Item $item, bool $testCount = false) : bool{
-		return ($testCount === true) ? ($item->getId() === ItemIds::POTION and $item->getCount() > 1) : $item->getId() === ItemIds::POTION;
-	}
 
 	/**
 	 * @param Item $item
@@ -103,9 +92,8 @@ class PracticeUtil{
 	 * @return bool
 	 */
 	public static function isSign(Item $item) : bool{
-		$signs = [ItemIds::SIGN, ItemIds::BIRCH_SIGN, ItemIds::SPRUCE_SIGN, ItemIds::JUNGLE_SIGN, ItemIds::DARKOAK_SIGN, ItemIds::ACACIA_SIGN];
-		$id = $item->getId();
-
+		$signs = [BlockTypeIds::OAK_SIGN, ItemTypeIds::BIRCH_SIGN, ItemTypeIds::SPRUCE_SIGN, ItemTypeIds::JUNGLE_SIGN, ItemTypeIds::DARK_OAK_SIGN, ItemTypeIds::ACACIA_SIGN];
+		$id = $item->getTypeId();
 		return self::arr_contains_value($id, $signs);
 	}
 
@@ -134,7 +122,7 @@ class PracticeUtil{
 	 *
 	 * @return null
 	 */
-	public static function getItemFromString(string $s){
+	public static function getItemFromString(string $s) : null{
 		$enchantsArr = [];
 
 		if(self::str_contains('-', $s)){
@@ -161,12 +149,12 @@ class PracticeUtil{
 
 			$isGoldenHead = false;
 
-			if($id === ItemIds::GOLDEN_APPLE and $meta === 1){
+			if($id === ItemTypeIds::GOLDEN_APPLE and $meta === 1){
 				$isGoldenHead = true;
 				$meta = 0;
 			}
 
-			$baseItem = (new ItemFactory)->get($id, $meta, $count);
+			$baseItem = LegacyStringToItemParser::getInstance()->parse($id . ":" . $meta)->setCount($count);
 
 			if($isGoldenHead === true) $baseItem = $baseItem->setCustomName(self::getName('golden-head'));
 		}
@@ -283,30 +271,12 @@ class PracticeUtil{
 
 		for($i = 0; $i < $itemSize; $i++){
 			$item = $itemInv->getItem($i);
-			$exec = !((!$keepAir and $item->getId() === 0));
+			$exec = !((!$keepAir and $item->getTypeId() === BlockTypeIds::AIR));
 			if($exec === true) $items[] = $item;
 		}
 
 		$result['armor'] = $armor;
 		$result['items'] = $items;
-
-		return $result;
-	}
-
-	/**
-	 * @param array $arr
-	 *
-	 * @return null
-	 */
-	public static function getBlockFromArr(array $arr){
-		$result = null;
-
-		if(self::arr_contains_keys($arr, 'id', 'meta')){
-			$id = intval($arr['id']);
-			$meta = intval($arr['meta']);
-
-			$result = BlockFactory::getInstance()->get($id, $meta);
-		}
 
 		return $result;
 	}
@@ -328,15 +298,6 @@ class PracticeUtil{
 		}
 
 		return $result;
-	}
-
-	/**
-	 * @param Block $block
-	 *
-	 * @return array
-	 */
-	#[ArrayShape(['id' => "int", 'meta' => "mixed"])] public static function blockToArr(Block $block) : array{
-		return ['id' => $block->getId(), 'meta' => $block->getMeta()];
 	}
 
 	/**
@@ -556,13 +517,13 @@ class PracticeUtil{
 			}
 		}
 
-		if(!is_null($pl)){
-			/*$pkt = new AdventureSettingsPacket();
+		/*if(!is_null($pl)){
+			$pkt = new AdventureSettingsPacket();
 			$pkt->setFlag(AdventureSettingsPacket::NO_PVP, $res);
 			$pkt->targetActorUniqueId = $pl->getId();
 
-			if($pl->handleAdventureSettings($pkt)) $pl->getNetworkSession()->sendDataPacket($pkt);*/
-		}
+			if($pl->handleAdventureSettings($pkt)) $pl->getNetworkSession()->sendDataPacket($pkt);
+		}*/
 	}
 
 	/**
@@ -657,7 +618,7 @@ class PracticeUtil{
 	 * @return bool
 	 */
 	#[Pure] public static function isFrozen(Player $player) : bool{
-		return $player->isImmobile();
+		return $player->hasNoClientPredictions();
 	}
 
 	/**
@@ -689,7 +650,8 @@ class PracticeUtil{
 
 			$p = $playerHandler->getPlayer($player);
 			$pl = $p->getPlayer();
-			$potion->onClickAir($pl, $pl->getDirectionVector());
+			$returnedItems = [];
+			$potion->onClickAir($pl, $pl->getDirectionVector(), $returnedItems);
 
 			if(!$pl->isCreative()){
 				$inv = $pl->getInventory();
@@ -769,7 +731,8 @@ class PracticeUtil{
 			$p->trackThrow();
 
 			$pl = $p->getPlayer();
-			$item->onClickAir($pl, $pl->getDirectionVector());
+			$returnedItems = [];
+			$item->onClickAir($pl, $pl->getDirectionVector(), $returnedItems);
 
 			if(self::isEnderpearlCooldownEnabled())
 				$p->setThrowPearl(false);
@@ -784,9 +747,7 @@ class PracticeUtil{
 			if(!$pl->isCreative()){
 				$inv = $pl->getInventory();
 				$index = $inv->getHeldItemIndex();
-				$count = $item->getCount();
-				if($count > 1) $inv->setItem($index, ItemFactory::getInstance()->get($item->getId(), $item->getMeta(), $count));
-				else $inv->setItem($index, VanillaItems::AIR());
+				$inv->setItem($index, VanillaItems::AIR());
 			}
 		}
 	}
@@ -851,10 +812,7 @@ class PracticeUtil{
 			$p = $practicePlayer->getPlayer();
 			$inv = $p->getInventory();
 			if(!$p->isCreative()){
-				$newItem = ItemFactory::getInstance()->get($item->getId(), $item->getMeta() + 1);
-				if($item->getMeta() > 65)
-					$newItem = VanillaItems::AIR();
-				$inv->setItemInHand($newItem);
+				$inv->setItemInHand(VanillaItems::AIR());
 			}
 		}
 	}
@@ -1398,7 +1356,7 @@ class PracticeUtil{
 	 */
 	public static function setFrozen(Player $player, bool $freeze, bool $forDuels = false) : void{
 		if(!is_null($player) and $player->isOnline()){
-			$player->setImmobile($freeze);
+			$player->setNoClientPredictions($freeze);
 			if($forDuels === false){
 				$msg = ($freeze === true) ? self::getMessage('frozen.active') : self::getMessage('frozen.inactive');
 				$player->sendMessage($msg);
@@ -1994,9 +1952,9 @@ class PracticeUtil{
 	public static function isGravityBlock($block) : bool{
 		$result = false;
 		if(is_int($block)){
-			$result = $block === BlockLegacyIds::SAND;
+			$result = $block === BlockTypeIds::SAND;
 		}elseif($block instanceof Block){
-			$result = $block->getId() === BlockLegacyIds::SAND or $block->getId() === BlockLegacyIds::GRAVEL;
+			$result = $block->getTypeId() === BlockTypeIds::SAND or $block->getTypeId() === BlockTypeIds::GRAVEL;
 		}
 		return $result;
 	}

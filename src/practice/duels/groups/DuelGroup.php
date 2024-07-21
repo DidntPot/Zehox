@@ -7,7 +7,8 @@ namespace practice\duels\groups;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\Pure;
 use pocketmine\block\Block;
-use pocketmine\block\BlockLegacyIds;
+use pocketmine\block\BlockTypeIds;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\utils\TextFormat;
 use pocketmine\world\Position;
 use practice\arenas\DuelArena;
@@ -21,16 +22,16 @@ use practice\scoreboard\ScoreboardUtil;
 
 class DuelGroup{
 	/** @var string */
-	public const NONE = "None";
+	public const string NONE = "None";
 	/** @var string */
-	private const NO_SPEC_MSG = "spectators.none";
+	private const string NO_SPEC_MSG = "spectators.none";
 
 	/** @var int */
-	public const MAX_COUNTDOWN_SEC = 5;
+	public const int MAX_COUNTDOWN_SEC = 5;
 	/** @var int */
-	public const MAX_DURATION_MIN = 30;
+	public const int MAX_DURATION_MIN = 30;
 	/** @var int */
-	public const MAX_END_DELAY_SEC = 1;
+	public const int MAX_END_DELAY_SEC = 1;
 
 	/** @var string */
 	private string $playerName;
@@ -605,7 +606,7 @@ class DuelGroup{
 		for($i = 0; $i < $size; $i++){
 			$block = $this->blocks[$i];
 			if($block instanceof Position){
-				$id = ($spleef === true) ? BlockLegacyIds::SNOW_BLOCK : BlockLegacyIds::AIR;
+				$id = ($spleef === true) ? VanillaBlocks::SNOW() : VanillaBlocks::AIR();
 				$level->setBlockAt($block->x, $block->y, $block->z, $id);
 			}
 		}
@@ -1087,8 +1088,8 @@ class DuelGroup{
 	 * @return bool
 	 */
 	private function isSpleefBlock(Block $position) : bool{
-		$id = $position->getId();
-		return $id === BlockLegacyIds::SNOW_BLOCK or $id === BlockLegacyIds::SNOW_LAYER;
+		$id = $position->getTypeId();
+		return $id === BlockTypeIds::SNOW or $id === BlockTypeIds::SNOW_LAYER;
 	}
 
 	/**

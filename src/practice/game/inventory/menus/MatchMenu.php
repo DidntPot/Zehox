@@ -5,6 +5,7 @@ namespace practice\game\inventory\menus;
 use muqsit\invmenu\InvMenu;
 use muqsit\invmenu\type\InvMenuTypeIds;
 use pocketmine\item\ItemIds;
+use pocketmine\item\ItemTypeIds;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 use practice\game\items\PracticeItem;
@@ -53,7 +54,7 @@ class MatchMenu{
 
 				$i = clone $item->getItem();
 
-				if($i->getId() === ItemIds::POTION) $properCount = 1;
+				if($i->getTypeId() === ItemTypeIds::POTION) $properCount = 1;
 
 				$i = $i->setLore($lore)->setCount($properCount);
 				$menu->getInventory()->setItem($slot, $i);

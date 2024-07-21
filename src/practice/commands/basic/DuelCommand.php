@@ -30,7 +30,7 @@ class DuelCommand extends Command{
 		$msg = null;
 
 		if($sender instanceof Player){
-			if(PracticeUtil::canExecDuelCommand($sender, $this->getPermission(), true)){
+			if(PracticeUtil::canExecDuelCommand($sender, $this->getPermissions()[0], true)){
 				$p = PracticeCore::getPlayerHandler()->getPlayer($sender);
 				$count = count($args);
 				if($count === 1){

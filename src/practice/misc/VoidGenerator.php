@@ -3,6 +3,7 @@
 namespace practice\misc;
 
 use pocketmine\block\BlockLegacyIds;
+use pocketmine\block\BlockTypeIds;
 use pocketmine\world\ChunkManager;
 use pocketmine\world\generator\Generator;
 
@@ -14,7 +15,7 @@ class VoidGenerator extends Generator{
 
 	public function generateChunk(ChunkManager $world, int $chunkX, int $chunkZ) : void{
 		if($chunkX == 16 && $chunkZ == 16){
-			$world->getChunk($chunkX, $chunkZ)?->setFullBlock(0, 64, 0, BlockLegacyIds::GRASS << 4);
+			$world->getChunk($chunkX, $chunkZ)?->setBlockStateId(0, 64, 0, BlockTypeIds::GRASS << 4);
 		}
 	}
 

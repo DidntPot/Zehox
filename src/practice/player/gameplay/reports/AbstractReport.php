@@ -7,7 +7,7 @@ use practice\PracticeUtil;
 
 abstract class AbstractReport{
 	/** @var string */
-	public const STAFF_NONE = "None";
+	public const string STAFF_NONE = "None";
 	/** @var PracticeTime */
 	protected PracticeTime $time;
 	/** @var string|null */

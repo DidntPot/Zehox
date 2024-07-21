@@ -27,7 +27,7 @@ class ClearInventoryCommand extends Command{
 	public function execute(CommandSender $sender, string $commandLabel, array $args) : bool{
 		$msg = null;
 		if(PracticeUtil::canExecBasicCommand($sender, false)){
-			if(PracticeUtil::testPermission($sender, $this->getPermission())){
+			if(PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 				$player = PracticeCore::getPlayerHandler()->getPlayer($sender->getName());
 				$len = count($args);
 				if($len === 0){

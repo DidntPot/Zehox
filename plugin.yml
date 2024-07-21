@@ -1,8 +1,8 @@
+---
 name: Practice
-version: "2.0.0"
+version: "3.0.0"
 
-api:
-  - "4.0.0"
+api: 5.0.0
 authors: 
   - "jkorn2324"
   - "DidntPot"
@@ -160,3 +160,4 @@ permissions:
   practice.permission.report.clear:
     description: "Allows player to clear all reports."
     default: op
+...

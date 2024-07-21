@@ -29,7 +29,7 @@ class FeedCommand extends Command{
 		$msg = null;
 		if(PracticeUtil::canExecBasicCommand($sender)){
 
-			if(PracticeUtil::testPermission($sender, $this->getPermission())){
+			if(PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 
 				$len = count($args);
 				$player = null;

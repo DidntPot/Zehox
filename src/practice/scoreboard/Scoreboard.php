@@ -13,11 +13,11 @@ use practice\player\PracticePlayer;
 
 class Scoreboard{
 	/** @var int */
-	private const SORT_ASCENDING = 0;
+	private const int SORT_ASCENDING = 0;
 	/** @var int */
-	private const SORT_DESCENDING = 1;
+	private const int SORT_DESCENDING = 1;
 	/** @var string */
-	private const SLOT_SIDEBAR = "sidebar";
+	private const string SLOT_SIDEBAR = "sidebar";
 
 	/** @var array */
 	private array $lines;

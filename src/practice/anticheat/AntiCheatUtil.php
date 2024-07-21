@@ -11,17 +11,17 @@ use practice\PracticeCore;
 
 class AntiCheatUtil{
 	/** @var int */
-	public const MAX_CHECK_FOR_PING = 50;
+	public const int MAX_CHECK_FOR_PING = 50;
 	/** @var float */
-	public const MAX_REACH_DIST = 14.5;
+	public const float MAX_REACH_DIST = 14.5;
 	/** @var int */
-	public const MAX_LETGO_REACH = 5;
+	public const int MAX_LETGO_REACH = 5;
 	/** @var int */
-	public const MAX_LETGO_CPS = 1;
+	public const int MAX_LETGO_CPS = 1;
 	/** @var int */
-	private const MAX_PING = 200;
+	private const int MAX_PING = 200;
 	/** @var float */
-	private const BLOCKS_AIR_LIMIT = 6.6;
+	private const float BLOCKS_AIR_LIMIT = 6.6;
 
 	/**
 	 * @param $player

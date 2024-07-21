@@ -10,7 +10,7 @@ use practice\duels\groups\DuelGroup;
 
 class PracticeTask extends Task{
 	/** @var int */
-	private const MAX_ANNOUNCEMENT_TIME = 45;
+	private const int MAX_ANNOUNCEMENT_TIME = 45;
 
 	/** @var PracticeCore */
 	private PracticeCore $core;

@@ -26,7 +26,7 @@ class BanCommand extends Command{
 	 * @throws CommandException
 	 */
 	public function execute(CommandSender $sender, string $commandLabel, array $args) : bool{
-		if(PracticeUtil::canExecBasicCommand($sender) and PracticeUtil::testPermission($sender, $this->getPermission())){
+		if(PracticeUtil::canExecBasicCommand($sender) and PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 
 			$p = PracticeCore::getPlayerHandler()->getPlayer($sender->getName());
 

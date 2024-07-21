@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace practice\player;
 
 use pocketmine\scheduler\Task;
-use practice\PracticeCore;
 use practice\PracticeUtil;
 use practice\scoreboard\ScoreboardUtil;
 

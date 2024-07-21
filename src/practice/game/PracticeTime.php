@@ -10,13 +10,13 @@ use practice\PracticeUtil;
 
 class PracticeTime{
 	/** @var int */
-	const ONE_YEAR_IN_MIN = 525600;
+	const int ONE_YEAR_IN_MIN = 525600;
 	/** @var float */
-	const ONE_MONTH_IN_MIN = 43800.048;
+	const float ONE_MONTH_IN_MIN = 43800.048;
 	/** @var int */
-	const ONE_DAY_IN_MIN = 1440;
+	const int ONE_DAY_IN_MIN = 1440;
 	/** @var int */
-	const ONE_HOUR_IN_MIN = 60;
+	const int ONE_HOUR_IN_MIN = 60;
 
 	/** @var int */
 	private int $day;

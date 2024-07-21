@@ -14,7 +14,7 @@ use practice\PracticeCore;
 use practice\PracticeUtil;
 
 class ReportHandler{
-	private $file;
+	private string $file;
 
 	public function __construct(){
 		$this->initFile();

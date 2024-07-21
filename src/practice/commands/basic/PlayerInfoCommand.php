@@ -30,7 +30,7 @@ class PlayerInfoCommand extends Command{
 		$len = count($args);
 
 		if(PracticeUtil::canExecBasicCommand($sender, $len > 0)){
-			if(PracticeUtil::testPermission($sender, $this->getPermission())){
+			if(PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 				if($len <= 1){
 					$name = ($len === 1) ? $args[0] : $sender->getName();
 					$playerHandler = PracticeCore::getPlayerHandler();

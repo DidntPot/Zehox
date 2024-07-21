@@ -78,8 +78,9 @@ class PlayerHandler{
 
 		if(!$mysqlEnabled){
 
-			$task = new AsyncUpdateLeaderboards($this->playerFolderPath, PracticeUtil::isMysqlEnabled(), $duelKits);
-			$this->server->getAsyncPool()->submitTask($task);
+			// TODO:
+			//$task = new AsyncUpdateLeaderboards($this->playerFolderPath, PracticeUtil::isMysqlEnabled(), $duelKits);
+			//$this->server->getAsyncPool()->submitTask($task);
 
 		}else{
 

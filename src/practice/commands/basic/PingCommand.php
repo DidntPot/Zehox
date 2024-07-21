@@ -26,7 +26,7 @@ class PingCommand extends Command{
 	 */
 	public function execute(CommandSender $sender, string $commandLabel, array $args) : bool{
 		$msg = null;
-		if(PracticeUtil::testPermission($sender, $this->getPermission())){
+		if(PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 			$len = count($args);
 			if($len === 0){
 				if($sender instanceof Player and PracticeCore::getPlayerHandler()->isPlayerOnline($sender->getName())){

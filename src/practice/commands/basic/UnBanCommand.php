@@ -26,7 +26,7 @@ class UnBanCommand extends Command{
 	public function execute(CommandSender $sender, string $commandLabel, array $args) : bool{
 		$msg = null;
 
-		if(PracticeUtil::canExecBasicCommand($sender) and PracticeUtil::testPermission($sender, $this->getPermission())){
+		if(PracticeUtil::canExecBasicCommand($sender) and PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 
 			$count = count($args);
 			$sendUsage = true;

@@ -5,26 +5,23 @@ declare(strict_types=1);
 namespace practice\game\entity;
 
 use JetBrains\PhpStorm\Pure;
+use pocketmine\block\BlockTypeIds;
 use pocketmine\entity\Entity;
 use pocketmine\entity\EntitySizeInfo;
 use pocketmine\entity\Human;
 use pocketmine\entity\Location;
 use pocketmine\entity\projectile\Projectile;
-use pocketmine\item\ItemIds;
+use pocketmine\item\ItemTypeIds;
 use pocketmine\math\RayTraceResult;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\NetworkBroadcastUtils;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\types\ActorEvent;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 use pocketmine\player\Player;
-use pocketmine\Server;
 use practice\player\PracticePlayer;
 
 class FishingHook extends Projectile{
-	/** @var float */
-	protected $gravity = 0.08;
-	/** @var float */
-	protected $drag = 0.05;
 	/** @var bool */
 	protected bool $caught = false;
 	/** @var Entity|null */
@@ -47,6 +44,20 @@ class FishingHook extends Projectile{
 	 */
 	public static function getNetworkTypeId() : string{
 		return EntityIds::FISHING_HOOK;
+	}
+
+	/**
+	 * @return float
+	 */
+	protected function getInitialDragMultiplier() : float{
+		return 0.05;
+	}
+
+	/**
+	 * @return float
+	 */
+	protected function getInitialGravity() : float{
+		return 0.08;
 	}
 
 	/**
@@ -86,7 +97,7 @@ class FishingHook extends Projectile{
 		}
 		if(($owner = $this->getOwningEntity()) != null && $owner instanceof Human){
 			$itemInHand = $owner->getInventory()->getItemInHand();
-			if($owner->getPosition()->distance($this->getPosition()) > 35 || $itemInHand->getId() !== ItemIds::FISHING_ROD || $this->attachedEntity !== null){
+			if($owner->getPosition()->distance($this->getPosition()) > 35 || $itemInHand->getTypeId() !== ItemTypeIds::FISHING_ROD || $this->attachedEntity !== null){
 				$this->close();
 				if($owner instanceof PracticePlayer){
 					$owner->stopFishing();
@@ -103,7 +114,7 @@ class FishingHook extends Projectile{
 		$pos = $this->getPosition();
 		$floorY = $pos->getFloorY();
 		for($y = $pos->getFloorY(); $y < 256; $y++){
-			if($this->getWorld()->getBlockAt($pos->getFloorX(), $y, $pos->getFloorZ())->getId() === 0){
+			if($this->getWorld()->getBlockAt($pos->getFloorX(), $y, $pos->getFloorZ())->getTypeId() === BlockTypeIds::AIR){
 				return $y;
 			}
 		}
@@ -116,7 +127,7 @@ class FishingHook extends Projectile{
 	public function reelLine() : void{
 		$owner = $this->getOwningEntity();
 		if($owner instanceof Human && $this->caught){
-			Server::getInstance()->broadcastPackets($owner->getViewers(), [ActorEventPacket::create($this->getId(), ActorEvent::FISH_HOOK_TEASE, 0)]);
+			NetworkBroadcastUtils::broadcastPackets($owner->getViewers(), [ActorEventPacket::create($this->getId(), ActorEvent::FISH_HOOK_TEASE, 0)]);
 		}
 		if(!$this->closed){
 			$this->close();

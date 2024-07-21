@@ -16,7 +16,7 @@ use practice\PracticeUtil;
 
 class PermissionsHandler{
 	/** @var string */
-	public const PERMISSION_PLACE_BREAK = 'practice.permission.build-break';
+	public const string PERMISSION_PLACE_BREAK = 'practice.permission.build-break';
 
 	/* @var Config */
 	private Config $config;

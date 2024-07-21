@@ -36,10 +36,10 @@ class PracticeEffect{
 	 */
 	public static function getEffectFrom(string $line) : PracticeEffect{
 		$split = explode(":", $line);
-		$id = intval($split[0]);
+		$id = strval($split[0]);
 		$amp = intval($split[1]);
 		$duration = intval($split[2]);
-		$effect = StringToEffectParser::getInstance()->get($id);
+		$effect = StringToEffectParser::getInstance()->parse($id);
 		return new PracticeEffect($effect, $duration, $amp);
 	}
 

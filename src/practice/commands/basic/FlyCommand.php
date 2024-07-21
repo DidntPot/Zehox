@@ -28,7 +28,7 @@ class FlyCommand extends Command{
 		$msg = null;
 
 		if(PracticeUtil::canExecBasicCommand($sender, false)){
-			if(PracticeUtil::testPermission($sender, $this->getPermission())){
+			if(PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 				$len = count($args);
 				if($len === 0){
 

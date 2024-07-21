@@ -167,9 +167,13 @@ class BaseCommand extends Command{
 						$result = PracticeUtil::testPermission($sender, $perm, false);
 					}else $result = true;
 				}
-			}else $result = PracticeUtil::testPermission($sender, parent::getPermission(), false);
+			}else $result = PracticeUtil::testPermission($sender, parent::getPermissions()[0]/** LMFAO */, false);
 		}
 		return $result;
+	}
+
+	public function getPermission() : string{
+		return $this->getPermissions()[0]; // LMFAO
 	}
 
 	/**

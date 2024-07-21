@@ -6,7 +6,6 @@ namespace practice\kits;
 
 use JetBrains\PhpStorm\ArrayShape;
 use pocketmine\item\Item;
-use pocketmine\item\ItemIds;
 use pocketmine\item\VanillaItems;
 use pocketmine\player\Player;
 use practice\game\effects\PracticeEffect;
@@ -16,7 +15,7 @@ use practice\PracticeUtil;
 
 class Kit{
 	/** @var string */
-	public const NO_KIT = 'none';
+	public const string NO_KIT = 'none';
 	/** @var array */
 	private array $items;
 	/** @var string */
@@ -260,25 +259,25 @@ class Kit{
 	}
 
 	/**
-	 * @param int $id
+	 * @param string $id
 	 *
 	 * @return bool
 	 */
 	public function hasEffect(int $id) : bool{
-		return $this->indexOf($id) !== -1;
+		return $this->indexOf($id) !== "";
 	}
 
 	/**
-	 * @param int $effectId
+	 * @param string $effectId
 	 *
-	 * @return int
+	 * @return string
 	 */
-	private function indexOf(int $effectId) : int{
-		$result = -1;
+	private function indexOf(string $effectId) : string{
+		$result = "";
 		for($i = 0; $i < count($this->effects); $i++){
 			$effect = $this->effects[$i];
 			if($effect instanceof PracticeEffect){
-				if($effect->getEffect()->getId() === $effectId){
+				if($effect->getEffect()->getName() === $effectId){
 					$result = $i;
 					break;
 				}
@@ -288,11 +287,11 @@ class Kit{
 	}
 
 	/**
-	 * @param int $id
+	 * @param string $id
 	 *
 	 * @return mixed
 	 */
-	private function getEffect(int $id) : mixed{
+	private function getEffect(string $id) : mixed{
 		return $this->effects[$this->indexOf($id)];
 	}
 

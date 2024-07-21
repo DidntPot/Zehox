@@ -27,7 +27,7 @@ class SpectateCommand extends Command{
 		$msg = null;
 
 		if($sender instanceof Player){
-			if(PracticeUtil::canExecSpecCommand($sender, $this->getPermission())){
+			if(PracticeUtil::canExecSpecCommand($sender, $this->getPermissions()[0])){
 				$count = count($args);
 				if($count === 1){
 					$player = $args[0];

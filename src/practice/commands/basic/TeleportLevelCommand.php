@@ -27,7 +27,7 @@ class TeleportLevelCommand extends Command{
 		$msg = null;
 
 		if(PracticeUtil::canExecBasicCommand($sender, false)){
-			if(PracticeUtil::testPermission($sender, $this->getPermission())){
+			if(PracticeUtil::testPermission($sender, $this->getPermissions()[0])){
 				$size = count($args);
 				if($size === 1){
 					$lvlName = $args[0];

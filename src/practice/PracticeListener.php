@@ -20,7 +20,6 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerBucketEmptyEvent;
 use pocketmine\event\player\PlayerBucketFillEvent;
 use pocketmine\event\player\PlayerChatEvent;
-use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
@@ -40,13 +39,14 @@ use pocketmine\item\EnderPearl;
 use pocketmine\item\FlintSteel;
 use pocketmine\item\Food;
 use pocketmine\item\ItemBlock;
-use pocketmine\item\ItemIds;
+use pocketmine\item\ItemTypeIds;
 use pocketmine\item\MushroomStew;
 use pocketmine\item\Potion;
 use pocketmine\item\SplashPotion;
 use pocketmine\item\VanillaItems;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\types\LevelSoundEvent;
+use pocketmine\player\chat\LegacyRawChatFormatter;
 use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -463,7 +463,7 @@ class PracticeListener implements Listener{
 		if(PracticeUtil::canUseItems($p)){
 			if($item instanceof Food){
 				$isGoldenHead = false;
-				if($item->getId() === ItemIds::GOLDEN_APPLE) $isGoldenHead = ($item->getMeta() === 1 or $item->getName() === PracticeUtil::getName('golden-head'));
+				if($item->getTypeId() === ItemTypeIds::GOLDEN_APPLE) $isGoldenHead = ($item->getName() === PracticeUtil::getName('golden-head'));
 
 				if($isGoldenHead === true){
 					/* @var $effects EffectInstance[] */
@@ -495,7 +495,7 @@ class PracticeListener implements Listener{
 					$inv->setItem($heldItem, $item);
 					$cancel = true;
 				}else{
-					if($item->getId() === ItemIds::MUSHROOM_STEW)
+					if($item->getTypeId() === ItemTypeIds::MUSHROOM_STEW)
 						$cancel = true;
 				}
 			}elseif($item instanceof Potion){
@@ -621,7 +621,7 @@ class PracticeListener implements Listener{
 					$cancel = true;
 
 				}else{
-					$checkPlaceBlock = $item->getId() < 255 or PracticeUtil::isSign($item) or $item instanceof ItemBlock or $item instanceof Bucket or $item instanceof FlintSteel;
+					$checkPlaceBlock = PracticeUtil::isSign($item) or $item instanceof ItemBlock or $item instanceof Bucket or $item instanceof FlintSteel;
 					if(PracticeUtil::canUseItems($player)){
 						if($checkPlaceBlock === true){
 							if($p->isInArena())
@@ -642,7 +642,7 @@ class PracticeListener implements Listener{
 							return;
 						}
 
-						if($item->getId() === ItemIds::FISHING_ROD){
+						if($item->getId() === ItemTypeIds::FISHING_ROD){
 
 							$use = false;
 
@@ -659,7 +659,7 @@ class PracticeListener implements Listener{
 							if($use === true) PracticeUtil::useRod($item, $player);
 							else $cancel = true;
 
-						}elseif($item->getId() === ItemIds::ENDER_PEARL and $item instanceof EnderPearl){
+						}elseif($item->getId() === ItemTypeIds::ENDER_PEARL and $item instanceof EnderPearl){
 
 							$use = false;
 
@@ -677,7 +677,7 @@ class PracticeListener implements Listener{
 
 							$cancel = true;
 
-						}elseif($item->getId() === ItemIds::SPLASH_POTION and $item instanceof SplashPotion){
+						}elseif($item->getId() === ItemTypeIds::SPLASH_POTION and $item instanceof SplashPotion){
 
 							$use = false;
 
@@ -695,7 +695,7 @@ class PracticeListener implements Listener{
 
 							$cancel = true;
 
-						}elseif($item->getId() === ItemIds::MUSHROOM_STEW and $item instanceof MushroomStew){
+						}elseif($item->getId() === ItemTypeIds::MUSHROOM_STEW and $item instanceof MushroomStew){
 
 							$inv = $player->getInventory();
 
@@ -838,7 +838,7 @@ class PracticeListener implements Listener{
 					$cancel = true;
 
 				}else{
-					$checkPlaceBlock = $item->getId() < 255 or PracticeUtil::isSign($item) or $item instanceof ItemBlock or $item instanceof Bucket or $item instanceof FlintSteel;
+					$checkPlaceBlock = PracticeUtil::isSign($item) or $item instanceof ItemBlock or $item instanceof Bucket or $item instanceof FlintSteel;
 					if(PracticeUtil::canUseItems($player)){
 						if($checkPlaceBlock === true){
 							if($p->isInArena())
@@ -915,11 +915,12 @@ class PracticeListener implements Listener{
 						$duel = $duelHandler->getDuel($name);
 						if($duel->isDuelRunning() and $duel->canBuild()){
 							$blockAgainst = $event->getBlockAgainst();
-							$blockReplaced = $event->getBlockReplaced();
-							$place = $duel->canPlaceBlock($blockAgainst);
-							if($place === true)
-								$duel->addBlock($blockReplaced);
-							else $cancel = true;
+							foreach($event->getTransaction()->getBlocks() as [$x, $y, $z, $blockReplaced]){
+								$place = $duel->canPlaceBlock($blockAgainst);
+								if($place === true)
+									$duel->addBlock($blockReplaced);
+								else $cancel = true;
+							}
 						}else $cancel = true;
 					}else{
 						$cancel = true;
@@ -1125,62 +1126,58 @@ class PracticeListener implements Listener{
 		$event->cancel();
 	}
 
-	/**
-	 * @param PlayerCommandPreprocessEvent $event
+	// TODO:
+	/**public function onCommandPreprocess(PlayerCommandPreprocessEvent $event) : void{
+	 * $p = $event->getPlayer();
+	 * $cancel = false;
 	 *
-	 * @return void
-	 */
-	public function onCommandPreprocess(PlayerCommandPreprocessEvent $event) : void{
-		$p = $event->getPlayer();
-		$cancel = false;
-
-		$playerHandler = PracticeCore::getPlayerHandler();
-
-		if($playerHandler->isPlayer($p)){
-			$player = $playerHandler->getPlayer($p);
-			$message = $event->getMessage();
-			$firstChar = $message[0];
-			$testInAntiSpam = false;
-			if($firstChar === '/'){
-
-				$usableCommandsInCombat = ['ping', 'tell', 'say'];
-
-				$tests = ['/ping', '/tell', '/say', '/w'];
-
-				if(PracticeUtil::str_contains('/me', $message)){
-					$event->cancel();
-					return;
-				}
-
-				$sendMsg = PracticeUtil::str_contains_from_arr($message, $tests);
-
-				if(!$player->canUseCommands(!$sendMsg)){
-					$use = false;
-					foreach($usableCommandsInCombat as $value){
-						$test = '/' . $value;
-						if(PracticeUtil::str_contains($test, $message)){
-							$use = true;
-							if($value === 'say') $testInAntiSpam = true;
-							break;
-						}
-					}
-
-					if($use === false) $cancel = true;
-				}
-			}else $testInAntiSpam = true;
-
-			if($testInAntiSpam === true){
-				if(PracticeUtil::canPlayerChat($p)){
-					if($player->isInAntiSpam()){
-						$player->sendMessage(PracticeUtil::getMessage('antispam-msg'));
-						$cancel = true;
-					}
-				}else $cancel = true;
-			}
-		}
-
-		if($cancel === true) $event->cancel();
-	}
+	 * $playerHandler = PracticeCore::getPlayerHandler();
+	 *
+	 * if($playerHandler->isPlayer($p)){
+	 * $player = $playerHandler->getPlayer($p);
+	 * $message = $event->getMessage();
+	 * $firstChar = $message[0];
+	 * $testInAntiSpam = false;
+	 * if($firstChar === '/'){
+	 *
+	 * $usableCommandsInCombat = ['ping', 'tell', 'say'];
+	 *
+	 * $tests = ['/ping', '/tell', '/say', '/w'];
+	 *
+	 * if(PracticeUtil::str_contains('/me', $message)){
+	 * $event->cancel();
+	 * return;
+	 * }
+	 *
+	 * $sendMsg = PracticeUtil::str_contains_from_arr($message, $tests);
+	 *
+	 * if(!$player->canUseCommands(!$sendMsg)){
+	 * $use = false;
+	 * foreach($usableCommandsInCombat as $value){
+	 * $test = '/' . $value;
+	 * if(PracticeUtil::str_contains($test, $message)){
+	 * $use = true;
+	 * if($value === 'say') $testInAntiSpam = true;
+	 * break;
+	 * }
+	 * }
+	 *
+	 * if($use === false) $cancel = true;
+	 * }
+	 * }else $testInAntiSpam = true;
+	 *
+	 * if($testInAntiSpam === true){
+	 * if(PracticeUtil::canPlayerChat($p)){
+	 * if($player->isInAntiSpam()){
+	 * $player->sendMessage(PracticeUtil::getMessage('antispam-msg'));
+	 * $cancel = true;
+	 * }
+	 * }else $cancel = true;
+	 * }
+	 * }
+	 *
+	 * if($cancel === true) $event->cancel();
+	 * }*/
 
 	/**
 	 * @param PlayerChatEvent $event
@@ -1195,7 +1192,7 @@ class PracticeListener implements Listener{
 
 		if(PracticeUtil::isRanksEnabled()){
 			$message = $event->getMessage();
-			$event->setFormat(PracticeUtil::getChatFormat($p, $message));
+			$event->setFormatter(new LegacyRawChatFormatter(PracticeUtil::getChatFormat($p, $message)));
 		}
 
 		if(!PracticeUtil::canPlayerChat($p)) $cancel = true;

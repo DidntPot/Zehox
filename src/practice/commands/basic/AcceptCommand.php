@@ -28,7 +28,7 @@ class AcceptCommand extends Command{
 	public function execute(CommandSender $sender, string $commandLabel, array $args) : bool{
 		$msg = null;
 		if($sender instanceof Player){
-			if(PracticeUtil::canExecAcceptCommand($sender, $this->getPermission())){
+			if(PracticeUtil::canExecAcceptCommand($sender, $this->getPermissions()[0])){
 				$count = count($args);
 				if($count === 1){
 					if(PracticeUtil::canAcceptPlayer($sender, $args[0]))

@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace practice\game\items;
 
 use JetBrains\PhpStorm\Pure;
+use pocketmine\block\utils\DyeColor;
+use pocketmine\block\utils\MobHeadType;
 use pocketmine\block\VanillaBlocks;
-use pocketmine\data\bedrock\LegacyItemIdToStringIdMap;
 use pocketmine\item\Item;
-use pocketmine\item\ItemIds;
+use pocketmine\item\ItemTypeIds;
 use pocketmine\item\VanillaItems;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -92,7 +93,7 @@ class ItemHandler{
 		$unranked = new PracticeItem('hub.unranked-duels', 0, VanillaItems::IRON_SWORD()->setCustomName(PracticeUtil::getName('unranked-duels')), 'Iron Sword');
 		$ranked = new PracticeItem('hub.ranked-duels', 1, VanillaItems::DIAMOND_SWORD()->setCustomName(PracticeUtil::getName('ranked-duels')), 'Diamond Sword');
 		$ffa = new PracticeItem('hub.ffa', 2, VanillaItems::IRON_AXE()->setCustomName(PracticeUtil::getName('play-ffa')), 'Iron Axe');
-		$leaderboard = new PracticeItem('hub.leaderboard', 4, VanillaItems::SKELETON_SKULL()->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Leaderboards ' . TextFormat::BLUE . '«'), 'Steve Head');
+		$leaderboard = new PracticeItem('hub.leaderboard', 4, VanillaBlocks::MOB_HEAD()->setMobHeadType(MobHeadType::SKELETON)->asItem()->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GREEN . 'Leaderboards ' . TextFormat::BLUE . '«'), 'Steve Head');
 		$settings = new PracticeItem('hub.settings', 7, VanillaItems::CLOCK()->setCustomName(TextFormat::BLUE . '» ' . TextFormat::GOLD . 'Your Settings ' . TextFormat::BLUE . '«'), 'Clock');
 		$inv = new PracticeItem('hub.duel-inv', 8, VanillaBlocks::CHEST()->asItem()->setCustomName(PracticeUtil::getName('duel-inventory')), 'Chest');
 
@@ -139,16 +140,13 @@ class ItemHandler{
 
 		$name = $i->getVanillaName();
 
-		if($i->getId() === ItemIds::POTION){
-			$meta = $i->getMeta();
-			$name = $this->potions[$meta];
-		}elseif($i->getMeta() === ItemIds::SPLASH_POTION){
-			$meta = $i->getMeta();
-			$name = 'Splash ' . $this->potions[$meta];
-		}elseif($i->getId() === ItemIds::BUCKET){
-			$meta = $i->getMeta();
-			if(isset($this->buckets[$meta]))
-				$name = $this->buckets[$meta];
+		if($i->getTypeId() === ItemTypeIds::POTION){
+			$name = $this->potions[0];
+		}elseif($i->getTypeId() === ItemTypeIds::SPLASH_POTION){
+			$name = 'Splash ' . $this->potions[0];
+		}elseif($i->getTypeId() === ItemTypeIds::BUCKET){
+			if(isset($this->buckets[0]))
+				$name = $this->buckets[0];
 		}
 
 		return $this->textures->getTexture($name);
@@ -261,8 +259,8 @@ class ItemHandler{
 	 */
 	private function initMiscItems() : void{
 		$exit_queue = new PracticeItem('exit.queue', 8, VanillaItems::REDSTONE_DUST()->setCustomName(PracticeUtil::getName('leave-queue')), $this->getTextureOf(VanillaItems::REDSTONE_DUST()));
-		$exit_spec = new PracticeItem('exit.spectator', 8, VanillaItems::GREEN_DYE()->setCustomName(PracticeUtil::getName('spec-hub')), $this->getTextureOf(VanillaItems::GREEN_DYE()), false);
-		$exit_inv = new PracticeItem('exit.inventory', 8, VanillaItems::GREEN_DYE()->setCustomName(TextFormat::RED . 'Exit'), $this->getTextureOf((VanillaItems::GREEN_DYE())));
+		$exit_spec = new PracticeItem('exit.spectator', 8, VanillaItems::DYE()->setColor(DyeColor::GREEN)->setCustomName(PracticeUtil::getName('spec-hub')), $this->getTextureOf(VanillaItems::DYE()->setColor(DyeColor::GREEN)), false);
+		$exit_inv = new PracticeItem('exit.inventory', 8, VanillaItems::DYE()->setColor(DyeColor::GREEN)->setCustomName(TextFormat::RED . 'Exit'), $this->getTextureOf((VanillaItems::DYE()->setColor(DyeColor::GREEN))));
 
 		array_push($this->itemList, $exit_queue, $exit_spec, $exit_inv);
 	}
@@ -565,7 +563,7 @@ class ItemHandler{
 					if(PracticeUtil::equals_string($uncoloredName, 'Global', 'global', 'GLOBAL', 'global '))
 						$uncoloredName = 'global';
 
-					$leaderboard = $leaderboards[$uncoloredName];
+					$leaderboard = $leaderboards[$uncoloredName] ?? [];
 
 					$item = clone $practiceItem->getItem();
 

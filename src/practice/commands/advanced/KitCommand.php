@@ -3,8 +3,8 @@
 namespace practice\commands\advanced;
 
 use JsonException;
+use pocketmine\block\BlockTypeIds;
 use pocketmine\command\CommandSender;
-use pocketmine\entity\effect\EffectInstance;
 use pocketmine\entity\effect\StringToEffectParser;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
@@ -166,7 +166,7 @@ class KitCommand extends BaseCommand{
 				$kit = PracticeCore::getKitHandler()->getKit($kitName);
 				$inv = $sender->getInventory();
 				$item = $inv->getItemInHand();
-				if(!is_null($item) and $item->getId() !== 0){
+				if(!is_null($item) and $item->getTypeId() !== BlockTypeIds::AIR){
 					$kit = $kit->setRepItem($item);
 					PracticeCore::getKitHandler()->updateKit($kitName, $kit);
 					$msg = PracticeUtil::getMessage("general.kits.kit-update");
@@ -194,7 +194,7 @@ class KitCommand extends BaseCommand{
 	private function removeEffect(CommandSender $sender, string $kitName, int $id) : void{
 		if(PracticeCore::getKitHandler()->isKit($kitName)){
 			$kit = PracticeCore::getKitHandler()->getKit($kitName);
-			if(!is_null(StringToEffectParser::getInstance()->get($id))){
+			if(!is_null(StringToEffectParser::getInstance()->parse($id))){
 				if($kit->hasEffect($id)){
 					$kit->removeEffect($id);
 					PracticeCore::getKitHandler()->updateKit($kitName, $kit);
@@ -226,8 +226,8 @@ class KitCommand extends BaseCommand{
 	private function addEffect(CommandSender $sender, string $kitName, int $id, int $amplifier, int $duration) : void{
 		if(PracticeCore::getKitHandler()->isKit($kitName)){
 			$kit = PracticeCore::getKitHandler()->getKit($kitName);
-			if(!is_null(($eff = StringToEffectParser::getInstance()->get($id)))){
-				$effect = new PracticeEffect(new EffectInstance($eff), $duration, $amplifier);
+			if(!is_null(($eff = StringToEffectParser::getInstance()->parse($id)))){
+				$effect = new PracticeEffect($eff, $duration, $amplifier);
 				if(!($kit->hasEffect($id))){
 					$kit->addEffect($effect);
 					PracticeCore::getKitHandler()->updateKit($kitName, $kit);
